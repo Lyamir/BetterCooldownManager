@@ -5,6 +5,7 @@ BCDM.InfoButton = "|A:glueannouncementpopup-icon-info:16:16|a "
 
 BCDM.AddOnName = C_AddOns.GetAddOnMetadata("BetterCooldownManager", "Title")
 
+BCDM.Icon = "Interface\\AddOns\\BetterCooldownManager\\Media\\Logo.png"
 
 BCDM.CooldownViewerToDB = {
     ["EssentialCooldownViewer"] = "Essential",

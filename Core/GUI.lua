@@ -266,7 +266,7 @@ function BCDM:CreateGUI()
 
     OpenedGUI = true
     GUIFrame = AG:Create("Frame")
-    GUIFrame:SetTitle(BCDM.AddOnName)
+    GUIFrame:SetTitle("|T" .. BCDM.Icon .. ":16:16|t " .. BCDM.AddOnName)
     GUIFrame:SetLayout("Fill")
     GUIFrame:SetWidth(700)
     GUIFrame:SetHeight(400)
