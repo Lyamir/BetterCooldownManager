@@ -1,5 +1,5 @@
 ## Interface: 120000
-## Title: |cFF4080FFBetter|rCooldownManager
+## Title: |cFF8080FFBetter|rCooldownManager
 ## Author: Unhalted
 ## SavedVariables: BetterCDMDB
 ## Category-enUS: Cooldown Manager

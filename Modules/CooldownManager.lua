@@ -1,5 +1,5 @@
 local _, BCDM = ...
-
+local CooldownViewerToDB = BCDM.CooldownViewerToDB
 local CooldownManagerViewers = {
     "EssentialCooldownViewer",
     "UtilityCooldownViewer",
@@ -10,12 +10,6 @@ local IconPerCooldownViewer = {
     ["EssentialCooldownViewer"] = 0,
     ["UtilityCooldownViewer"] = 0,
     ["BuffIconCooldownViewer"] = 0,
-}
-
-local CooldownViewerToDB = {
-    ["EssentialCooldownViewer"] = "Essential",
-    ["UtilityCooldownViewer"] = "Utility",
-    ["BuffIconCooldownViewer"] = "Buffs",
 }
 
 local function StripTextures(textureToStrip)
@@ -197,4 +191,19 @@ function BCDM:SetupCooldownManager()
     for _, cooldownViewer in ipairs(CooldownManagerViewers) do
         hooksecurefunc(_G[cooldownViewer], "RefreshLayout", function() SkinCooldownManager() PositionCooldownViewers() SizeAllIcons() end)
     end
+end
+
+function BCDM:UpdateCooldownViewer(cooldownViewer)
+    SizeIconsInCooldownViewer(cooldownViewer, BCDM.db.global[CooldownViewerToDB[cooldownViewer]].IconSize)
+    AdjustChargeCount(cooldownViewer)
+    if _G[cooldownViewer] and _G[cooldownViewer].Layout then
+        _G[cooldownViewer]:Layout()
+    end
+    PositionCooldownViewers()
+end
+
+function BCDM:RefreshAllViewers()
+    BCDM:UpdateCooldownViewer("EssentialCooldownViewer")
+    BCDM:UpdateCooldownViewer("UtilityCooldownViewer")
+    BCDM:UpdateCooldownViewer("BuffIconCooldownViewer")
 end

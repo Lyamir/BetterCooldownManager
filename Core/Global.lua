@@ -1,6 +1,16 @@
 local _, BCDM = ...
 
+BCDM.LSM = LibStub("LibSharedMedia-3.0")
+BCDM.InfoButton = "|A:glueannouncementpopup-icon-info:16:16|a "
+
 BCDM.AddOnName = C_AddOns.GetAddOnMetadata("BetterCooldownManager", "Title")
+
+
+BCDM.CooldownViewerToDB = {
+    ["EssentialCooldownViewer"] = "Essential",
+    ["UtilityCooldownViewer"] = "Utility",
+    ["BuffIconCooldownViewer"] = "Buffs",
+}
 
 function BCDM:Print(MSG)
     print(BCDM.AddOnName..": "..MSG)
@@ -58,4 +68,12 @@ function BCDM:AddPixelBorder(frame)
             line:SetShown(borderSize > 0)
         end
     end
+end
+
+function BCDM:SetupSlashCommands()
+    SLASH_BCDM1 = "/bcdm"
+    SlashCmdList["BCDM"] = function(msg)
+        if msg == "" or msg == "gui" or msg == "options" then BCDM:CreateGUI() end
+    end
+    BCDM:Print("'|cFF8080FF/bcdm|r' for in-game configuration.")
 end
