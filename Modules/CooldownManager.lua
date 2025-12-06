@@ -226,6 +226,7 @@ local function SetCooldownViewerPoints(cooldownViewer)
 end
 
 function BCDM:SetupCooldownManager()
+    C_CVar.SetCVar("cooldownViewerEnabled", 1)
     PositionCooldownViewers()
     for cooldownViewer, _ in pairs(IconPerCooldownViewer) do ApplyCooldownText(cooldownViewer) end
     hooksecurefunc(EditModeManagerFrame, "EnterEditMode", function() PositionCooldownViewers() SizeIconsInCooldownViewer("EssentialCooldownViewer") SizeIconsInCooldownViewer("UtilityCooldownViewer") SizeIconsInCooldownViewer("BuffIconCooldownViewer") BCDM:SetPowerBarWidth() BCDM:SetSecondaryPowerBarWidth() BCDM:SetCastBarWidth() AdjustCooldownManagerStrata() end)
