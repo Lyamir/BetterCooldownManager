@@ -3,65 +3,93 @@ BCDM.CustomFrames = BCDM.CustomFrames or {}
 
 local DefensiveSpells = {
     -- Monk
-    [115203] = true,        -- Fortifying Brew
-    [1241059] = true,       -- Celestial Infusion
-    [322507] = true,        -- Celestial Brew
-    [122470] = true,        -- Touch of Karma
+    ["MONK"] = {
+        [115203] = true,        -- Fortifying Brew
+        [1241059] = true,       -- Celestial Infusion
+        [322507] = true,        -- Celestial Brew
+        [122470] = true,        -- Touch of Karma
+    },
     -- Demon Hunter
-    [196718] = true,        -- Darkness
-    [198589] = true,        -- Blur
-    [203720] = true,        -- Demon Spikes
+    ["DEMONHUNTER"] = {
+        [196718] = true,        -- Darkness
+        [198589] = true,        -- Blur
+        [203720] = true,        -- Demon Spikes
+    },
     -- Death Knight
-    [55233] = true,         -- Vampiric Blood
-    [48707] = true,         -- Anti-Magic Shell
-    [51052] = true,         -- Anti-Magic Zone
-    [49039] = true,         -- Lichborne
-    [48792] = true,         -- Icebound Fortitude
+    ["DEATHKNIGHT"] = {
+        [55233] = true,         -- Vampiric Blood
+        [48707] = true,         -- Anti-Magic Shell
+        [51052] = true,         -- Anti-Magic Zone
+        [49039] = true,         -- Lichborne
+        [48792] = true,         -- Icebound Fortitude
+    },
     -- Mage
-    [342245] = true,        -- Alter Time
-    [11426] = true,         -- Ice Barrier
-    [235313] = true,        -- Blazing Barrier
-    [235450] = true,        -- Prismatic Barrier
-    [414658] = true,        -- Ice Cold
-    [45438] = true,         -- Ice Block
+    ["MAGE"] = {
+        [342245] = true,        -- Alter Time
+        [11426] = true,         -- Ice Barrier
+        [235313] = true,        -- Blazing Barrier
+        [235450] = true,        -- Prismatic Barrier
+        [414658] = true,        -- Ice Cold
+        [45438] = true,         -- Ice Block
+    },
     -- Paladin
-    [1022] = true,          -- Blessing of Protection
-    [642] = true,           -- Divine Shield
-    [403876] = true,        -- Divine Shield
-    [6940] = true,          -- Blessing of Sacrifice
-    [86659] = true,         -- Guardian of Ancient Kings
-    [31850] = true,         -- Ardent Defender
+    ["PALADIN"] = {
+        [1022] = true,          -- Blessing of Protection
+        [642] = true,           -- Divine Shield
+        [403876] = true,        -- Divine Shield
+        [6940] = true,          -- Blessing of Sacrifice
+        [86659] = true,         -- Guardian of Ancient Kings
+        [31850] = true,         -- Ardent Defender
+    },
     -- Shaman
-    [108271] = true,        -- Astral Shift
+    ["SHAMAN"] = {
+        [108271] = true,        -- Astral Shift
+    },
     -- Druid
-    [22812] = true,         -- Barkskin
-    [61336] = true,         -- Survival Instincts
+    ["DRUID"] = {
+        [22812] = true,         -- Barkskin
+        [61336] = true,         -- Survival Instincts
+    },
     -- Evoker
-    [363916] = true,        -- Obsidian Scales
-    [374227] = true,        -- Zephyr
+    ["EVOKER"] = {
+        [363916] = true,        -- Obsidian Scales
+        [374227] = true,        -- Zephyr
+    },
     -- Warrior
-    [118038] = true,        -- Die by the Sword
-    [184364] = true,        -- Enraged Regeneration
-    [23920] = true,         -- Spell Reflection
-    [97462] = true,         -- Rallying Cry
-    [871] = true,           -- Shield Wall
+    ["WARRIOR"] = {
+        [118038] = true,        -- Die by the Sword
+        [184364] = true,        -- Enraged Regeneration
+        [23920] = true,         -- Spell Reflection
+        [97462] = true,         -- Rallying Cry
+        [871] = true,           -- Shield Wall
+    },
     -- Priest
-    [47585] = true,         -- Dispersion
-    [19236] = true,         -- Desperate Prayer
-    [586] = true,           -- Fade
+    ["PRIEST"] = {
+        [47585] = true,         -- Dispersion
+        [19236] = true,         -- Desperate Prayer
+        [586] = true,           -- Fade
+    },
     -- Warlock
-    [104773] = true,        -- Unending Resolve
-    [108416] = true,        -- Dark Pact
+    ["WARLOCK"] = {
+        [104773] = true,        -- Unending Resolve
+        [108416] = true,        -- Dark Pact
+    },
     -- Hunter
-    [186265] = true,        -- Aspect of the Turtle
-    [264735] = true,        -- Survival of the Fittest
-    [109304] = true,        -- Exhilaration
+    ["HUNTER"] = {
+        [186265] = true,        -- Aspect of the Turtle
+        [264735] = true,        -- Survival of the Fittest
+        [109304] = true,        -- Exhilaration
+    },
     -- Rogue
-    [31224] = true,         -- Cloak of Shadows
-    [1966] = true,          -- Feint
-    [5277] = true,          -- Evasion
-    [185311] = true,        -- Crimson Vial
+    ["ROGUE"] = {
+        [31224] = true,         -- Cloak of Shadows
+        [1966] = true,          -- Feint
+        [5277] = true,          -- Evasion
+        [185311] = true,        -- Crimson Vial
+    }
 }
+
+BCDM.DefensiveSpells = DefensiveSpells
 
 function CreateCustomIcon(spellId)
     local CooldownManagerDB = BCDM.db.profile
@@ -176,7 +204,10 @@ end
 function BCDM:SetupCustomIcons()
     wipe(BCDM.CustomFrames)
     wipe(BCDM.DefensiveBar)
-    for spellId in pairs(DefensiveSpells) do
+    local _, class = UnitClass("player")
+
+    local spellList = DefensiveSpells[class] or {}
+    for spellId in pairs(spellList) do
         local frame = CreateCustomIcon(spellId)
         BCDM.CustomFrames[spellId] = frame
         table.insert(BCDM.DefensiveBar, frame)
@@ -185,21 +216,30 @@ function BCDM:SetupCustomIcons()
 end
 
 function BCDM:ResetCustomIcons()
+    -- Can we even destroy frames?
     for spellId, frame in pairs(BCDM.CustomFrames) do
-        frame:Hide()
-        frame:ClearAllPoints()
-        frame:SetParent(nil)
+        if frame then
+            frame:Hide()
+            frame:ClearAllPoints()
+            frame:SetParent(nil)
+            frame:UnregisterAllEvents()
+            frame:SetScript("OnUpdate", nil)
+            frame:SetScript("OnEvent", nil)
+        end
         _G["BCDM_Custom_" .. spellId] = nil
     end
-    BCDM.CustomFrames = {}
+    wipe(BCDM.CustomFrames)
     wipe(BCDM.DefensiveBar)
-    for spellId in pairs(DefensiveSpells) do
+    local _, class = UnitClass("player")
+    local spellList = DefensiveSpells[class] or {}
+    for spellId in pairs(spellList) do
         local frame = CreateCustomIcon(spellId)
         BCDM.CustomFrames[spellId] = frame
         table.insert(BCDM.DefensiveBar, frame)
     end
     LayoutCustomIcons()
 end
+
 
 function BCDM:UpdateDefensiveIcons()
     local CooldownManagerDB = BCDM.db.profile
@@ -211,6 +251,7 @@ function BCDM:UpdateDefensiveIcons()
         if icon then
             icon:SetSize(DefensiveDB.IconSize[1], DefensiveDB.IconSize[2])
             icon.Icon:SetTexCoord((GeneralDB.IconZoom) * 0.5, 1 - (GeneralDB.IconZoom) * 0.5, (GeneralDB.IconZoom) * 0.5, 1 - (GeneralDB.IconZoom) * 0.5)
+            icon.Charges:ClearAllPoints()
             icon.Charges:SetFont(BCDM.Media.Font, DefensiveDB.Count.FontSize, GeneralDB.FontFlag)
             icon.Charges:SetPoint(DefensiveDB.Count.Anchors[1], icon, DefensiveDB.Count.Anchors[2], DefensiveDB.Count.Anchors[3], DefensiveDB.Count.Anchors[4])
             icon.Charges:SetTextColor(DefensiveDB.Count.Colour[1], DefensiveDB.Count.Colour[2], DefensiveDB.Count.Colour[3], 1)

@@ -43,6 +43,22 @@ local PowerNames = {
     ["RUNE_RECHARGE"] = "Rune on Cooldown",
 }
 
+local ClassToPrettyClass = {
+    ["DEATHKNIGHT"] = "|cFFC41E31Death Knight|r",
+    ["DRUID"]       = "|cFFFF7C0ADruid|r",
+    ["HUNTER"]      = "|cFFABD473Hunter|r",
+    ["MAGE"]        = "|cFF69CCF0Mage|r",
+    ["MONK"]        = "|cFF00FF96Monk|r",
+    ["PALADIN"]     = "|cFFF58CBAPaladin|r",
+    ["PRIEST"]      = "|cFFFFFFFFPriest|r",
+    ["ROGUE"]       = "|cFFFFF569Rogue|r",
+    ["SHAMAN"]      = "|cFF0070D0Shaman|r",
+    ["WARLOCK"]     = "|cFF9482C9Warlock|r",
+    ["WARRIOR"]     = "|cFFC79C6EWarrior|r",
+    ["DEMONHUNTER"] = "|cFFA330C9Demon Hunter|r",
+    ["EVOKER"]      = "|cFF33937FEvoker|r",
+}
+
 local ParentAnchors = {
     Utility = {
         {
@@ -110,6 +126,15 @@ local function FetchEditModeLayouts()
     return allLayouts
 end
 
+local function FetchSpellInformation(spellId)
+    local spellData = C_Spell.GetSpellInfo(spellId)
+    if spellData then
+        local spellName = spellData.name
+        local icon = spellData.iconID
+        return string.format("|T%s:20:20|t %s", icon, spellName)
+    end
+end
+
 local function AddAnchor(anchorGroup, key, label)
     for _, existingKey in ipairs(anchorGroup[2]) do if existingKey == key then return end end
     anchorGroup[1][key] = label
@@ -174,19 +199,23 @@ local function DrawGeneralSettings(parentContainer)
     EditModeSettings:SetLayout("Flow")
     ScrollFrame:AddChild(EditModeSettings)
 
+    local AutoEditModeInfoTag = CreateInfoTag("This setting will automatically apply the selected |cFF8080FFEdit Mode Layout|r when logging in.\nThe layouts shown will only be those that you have created/imported.")
+    EditModeSettings:AddChild(AutoEditModeInfoTag)
+
     local AutoSetEditMode = AG:Create("CheckBox")
-    AutoSetEditMode:SetLabel("Automatically Set Edit Mode on Login")
+    AutoSetEditMode:SetLabel("Automatically Apply Edit Mode")
     AutoSetEditMode:SetValue(BCDM.db.global.AutomaticallySetEditMode)
     AutoSetEditMode:SetRelativeWidth(0.5)
-    AutoSetEditMode:SetCallback("OnValueChanged", function(_, _, value) BCDM.db.global.AutomaticallySetEditMode = value BCDM:SetEditMode(BCDM.db.global.LayoutNumber) BCDM:UpdateBCDM() end)
+    AutoSetEditMode:SetCallback("OnValueChanged", function(_, _, value) BCDM.db.global.AutomaticallySetEditMode = value BCDM:SetEditMode(BCDM.db.global.LayoutNumber) BCDM:UpdateBCDM() LayoutNumber:SetDisabled(not value) end)
     EditModeSettings:AddChild(AutoSetEditMode)
 
-    local LayoutNumber = AG:Create("Dropdown")
-    LayoutNumber:SetLabel("Edit Mode Layout Number")
+    LayoutNumber = AG:Create("Dropdown")
+    LayoutNumber:SetLabel("Edit Mode Layout")
     LayoutNumber:SetList(FetchEditModeLayouts())
     LayoutNumber:SetValue(BCDM.db.global.LayoutNumber)
     LayoutNumber:SetRelativeWidth(0.5)
     LayoutNumber:SetCallback("OnValueChanged", function(_, _, value) BCDM.db.global.LayoutNumber = value BCDM:SetEditMode(value) end)
+    LayoutNumber:SetDisabled(not BCDM.db.global.AutomaticallySetEditMode)
     EditModeSettings:AddChild(LayoutNumber)
 
     local FontContainer = AG:Create("InlineGroup")
@@ -379,6 +408,8 @@ local function DrawGeneralSettings(parentContainer)
         BCDM:UpdateBCDM()
     end)
     CustomColoursContainer:AddChild(ResetPowerColoursButton)
+
+    ScrollFrame:DoLayout()
 
     return ScrollFrame
 end
@@ -701,6 +732,34 @@ local function DrawDefensiveSettings(parentContainer)
     Charges_FontSize:SetRelativeWidth(0.33)
     Charges_FontSize:SetCallback("OnValueChanged", function(_, _, value) CooldownViewerDB.Count.FontSize = value BCDM:UpdateCooldownViewer("DefensiveCooldownViewer") end)
     ChargesContainer:AddChild(Charges_FontSize)
+
+    local SupportedDefensivesContainer = AG:Create("InlineGroup")
+    SupportedDefensivesContainer:SetTitle("Supported Defensive Abilities")
+    SupportedDefensivesContainer:SetFullWidth(true)
+    SupportedDefensivesContainer:SetLayout("Flow")
+    ScrollFrame:AddChild(SupportedDefensivesContainer)
+
+    for class, _ in pairs(BCDM.DefensiveSpells) do
+        local classContainer = AG:Create("InlineGroup")
+        classContainer:SetTitle(ClassToPrettyClass[class])
+        classContainer:SetFullWidth(true)
+        classContainer:SetLayout("Flow")
+        SupportedDefensivesContainer:AddChild(classContainer)
+
+        for spellID in pairs(BCDM.DefensiveSpells[class]) do
+            local DefensiveAbilityLabel = AG:Create("InteractiveLabel")
+            DefensiveAbilityLabel:SetText(FetchSpellInformation(spellID))
+            DefensiveAbilityLabel:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
+            DefensiveAbilityLabel:SetJustifyH("LEFT")
+            DefensiveAbilityLabel:SetJustifyV("MIDDLE")
+            DefensiveAbilityLabel:SetRelativeWidth(0.33)
+            DefensiveAbilityLabel:SetCallback("OnEnter", function() GameTooltip:SetOwner(DefensiveAbilityLabel.frame, "ANCHOR_CURSOR") GameTooltip:SetSpellByID(spellID) end)
+            DefensiveAbilityLabel:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+            classContainer:AddChild(DefensiveAbilityLabel)
+        end
+    end
+
+    ScrollFrame:DoLayout()
 
     return ScrollFrame
 end
