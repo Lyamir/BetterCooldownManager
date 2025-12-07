@@ -105,6 +105,7 @@ function CreateCustomIcon(spellId)
     customSpellIcon:SetSize(DefensiveDB.IconSize[1], DefensiveDB.IconSize[2])
     customSpellIcon:SetPoint(unpack(DefensiveDB.Anchors))
     customSpellIcon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+    customSpellIcon:RegisterEvent("PLAYER_ENTERING_WORLD")
 
     local HighLevelContainer = CreateFrame("Frame", nil, customSpellIcon)
     HighLevelContainer:SetAllPoints(customSpellIcon)
@@ -128,7 +129,7 @@ function CreateCustomIcon(spellId)
     local spellCharges = C_Spell.GetSpellCharges(spellId)
     customSpellIcon.Charges:SetText(spellCharges and spellCharges.currentCharges or "")
     customSpellIcon:HookScript("OnEvent", function(self, event, ...)
-        if event == "SPELL_UPDATE_COOLDOWN" then
+        if event == "SPELL_UPDATE_COOLDOWN" or event == "PLAYER_ENTERING_WORLD" then
             local cooldownData = C_Spell.GetSpellCooldown(spellId)
             if spellCharges then
                 customSpellIcon.Charges:SetText(C_Spell.GetSpellCharges(spellId).currentCharges or "")
