@@ -79,7 +79,6 @@ local DefensiveSpells = {
         [186265] = true,        -- Aspect of the Turtle
         [264735] = true,        -- Survival of the Fittest
         [109304] = true,        -- Exhilaration
-        [272679] = true,        -- Command Pet: Fortitude of the Bear
         [272682] = true,        -- Command Pet: Master's Call
         [272678] = true,        -- Command Pet: Primal Rage
     },
