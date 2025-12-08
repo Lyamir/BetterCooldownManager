@@ -819,7 +819,7 @@ local function DrawDefensiveSettings(parentContainer)
     SupportedDefensivesContainer:AddChild(infoTag)
 
     local function BuildDefensiveSpellList()
-        local profile = BCDM.db.profile.Defensive.DefensiveSpells[playerClass]
+        local profile = BCDM.db.profile.Defensive.DefensiveSpells[playerClass] or {}
         BCDMGUI.classContainer:ReleaseChildren()
         for spellID in pairs(profile) do
             local defensiveCheckBox = AG:Create("CheckBox")
