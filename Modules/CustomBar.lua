@@ -254,7 +254,13 @@ local function ApplyCooldownText(cooldown)
     end
     local region = cooldown.customBarCooldownText
     if not region then return end
-    region:SetFont(BCDM.Media.Font, CooldownTextDB.FontSize, GeneralDB.FontFlag)
+    if CooldownTextDB.ScaleByIconSize then
+        local iconWidth = cooldown:GetWidth()
+        local scaleFactor = iconWidth / 36
+        region:SetFont(BCDM.Media.Font, CooldownTextDB.FontSize * scaleFactor, GeneralDB.FontFlag)
+    else
+        region:SetFont(BCDM.Media.Font, CooldownTextDB.FontSize, GeneralDB.FontFlag)
+    end
     region:SetTextColor(unpack(CooldownTextDB.Colour))
     region:SetShadowColor(unpack(GeneralDB.Shadows.Colour))
     region:SetShadowOffset(GeneralDB.Shadows.OffsetX, GeneralDB.Shadows.OffsetY)

@@ -16,6 +16,7 @@ BCDM.Defaults = {
                 FontSize = 15,
                 Colour = {1, 1, 1},
                 Anchors = {"CENTER", "CENTER", 0, 0},
+                ScaleByIconSize = false
             },
             Shadows = {
                 Colour = {0, 0, 0, 1},
