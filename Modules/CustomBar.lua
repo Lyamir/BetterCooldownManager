@@ -527,7 +527,7 @@ function BCDM:AddCustomSpell(value)
     if not spellId then return end
     local profileDB = BCDM.db.profile
     local _, class = UnitClass("player")
-    local specName = select(2, GetSpecializationInfo(GetSpecialization())):upper()
+    local specName = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
     profileDB.Custom.CustomSpells[class] = profileDB.Custom.CustomSpells[class] or {}
     profileDB.Custom.CustomSpells[class][specName] = profileDB.Custom.CustomSpells[class][specName] or {}
     local specTable = profileDB.Custom.CustomSpells[class][specName]
@@ -549,7 +549,7 @@ function BCDM:RemoveCustomSpell(value)
     if not spellId then return end
     local profileDB = BCDM.db.profile
     local _, class = UnitClass("player")
-    local specName = select(2, GetSpecializationInfo(GetSpecialization())):upper()
+    local specName = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
     local specTable = profileDB.Custom.CustomSpells[class] and profileDB.Custom.CustomSpells[class][specName]
     if not specTable then return end
     specTable[spellId] = nil
@@ -569,11 +569,10 @@ end
 function BCDM:ResetCustomSpells()
     local profileDB = BCDM.db.profile
     local _, class = UnitClass("player")
-    local specName = select(2, GetSpecializationInfo(GetSpecialization())):upper()
+    local specName = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
     if profileDB.Custom.CustomSpells[class] then
         profileDB.Custom.CustomSpells[class][specName] = nil
     end
-    BCDM:CopyCustomSpellsToDB()
     BCDM:ResetCustomIcons()
 end
 
@@ -581,7 +580,7 @@ function BCDM:MoveCustomSpell(spellId, value)
     if not spellId or not value then return end
     local profileDB = BCDM.db.profile
     local _, class = UnitClass("player")
-    local specName = select(2, GetSpecializationInfo(GetSpecialization())):upper()
+    local specName = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
     local specTable = profileDB.Custom.CustomSpells[class] and profileDB.Custom.CustomSpells[class][specName]
     if not specTable or not specTable[spellId] then return end
     if specTable[spellId].layoutIndex + value < 1 then return end

@@ -146,7 +146,7 @@ function LayoutItemIcons()
     local iconH   = icons[1]:GetHeight()
     local totalW  = (iconW + spacing) * #icons - spacing
 
-    ItemContainer:SetSize(totalW, iconH)
+    ItemContainer:SetSize(totalW or 36, iconH or 36)
     local layoutConfig = LayoutConfig[ItemDB.Anchors[1]]
 
     local offsetX = totalW * layoutConfig.offsetMultiplier
@@ -193,16 +193,11 @@ function BCDM:SetupItemIcons()
 
     for itemId, data in pairs(itemList) do
         if data.isActive then
-            table.insert(iconOrder, {
-                itemId = itemId,
-                layoutIndex = data.layoutIndex or 9999
-            })
+            table.insert(iconOrder, { itemId = itemId, layoutIndex = data.layoutIndex or 9999 })
         end
     end
 
-    table.sort(iconOrder, function(a, b)
-        return a.layoutIndex < b.layoutIndex
-    end)
+    table.sort(iconOrder, function(a, b) return a.layoutIndex < b.layoutIndex end)
 
     for _, entry in ipairs(iconOrder) do
         local frame = CreateItemIcon(entry.itemId)
@@ -381,5 +376,6 @@ function BCDM:RemoveCustomItem(itemId)
         profileDB.Items.CustomItems[entry.itemId].layoutIndex = index
         index = index + 1
     end
+    DevTool:AddData(profileDB.Items.CustomItems)
     BCDM:ResetItemIcons()
 end
