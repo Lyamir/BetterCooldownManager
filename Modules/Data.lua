@@ -245,16 +245,20 @@ BCDM.ITEMS = {
 
 function BCDM:AddRecommendedItems()
     local CooldownManagerDB = BCDM.db.profile
+    if not CooldownManagerDB then return end
+
     local CustomDB = CooldownManagerDB.CooldownManager.Item
     if not BCDM.ITEMS or type(BCDM.ITEMS) ~= "table" then return end
     if not CustomDB then CustomDB = {} CooldownManagerDB.CooldownManager.Item = CustomDB end
     if not CustomDB.Items then CustomDB.Items = {} end
+
     for itemId, data in pairs(BCDM.ITEMS) do
-        if not CustomDB.Items[itemId] then
+        if itemId and data and not CustomDB.Items[itemId] then
             CustomDB.Items[itemId] = data
         end
     end
 end
+
 function BCDM:AddRecommendedSpells()
     local CooldownManagerDB = BCDM.db.profile
     local CustomDB = CooldownManagerDB.CooldownManager.Custom
