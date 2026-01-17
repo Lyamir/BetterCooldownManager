@@ -152,7 +152,19 @@ local function LayoutCustomCooldownViewer()
     }
 
     local containerAnchorFrom = CustomDB.Layout[1]
-    if growthDirection == "LEFT" then containerAnchorFrom = anchorFlipMap[CustomDB.Layout[1]] or CustomDB.Layout[1] end
+    if growthDirection == "LEFT" then
+        containerAnchorFrom = anchorFlipMap[CustomDB.Layout[1]] or CustomDB.Layout[1]
+    elseif growthDirection == "UP" then
+        local verticalFlipMap = {
+            ["TOPLEFT"] = "BOTTOMLEFT",
+            ["TOP"] = "BOTTOM",
+            ["TOPRIGHT"] = "BOTTOMRIGHT",
+            ["BOTTOMLEFT"] = "TOPLEFT",
+            ["BOTTOM"] = "TOP",
+            ["BOTTOMRIGHT"] = "TOPRIGHT",
+        }
+        containerAnchorFrom = verticalFlipMap[CustomDB.Layout[1]] or CustomDB.Layout[1]
+    end
 
     if not BCDM.CustomCooldownViewerContainer then
         BCDM.CustomCooldownViewerContainer = CreateFrame("Frame", "BCDM_CustomCooldownViewer", UIParent, "BackdropTemplate")
@@ -206,7 +218,9 @@ local function LayoutCustomCooldownViewer()
         spellIcon:Show()
     end
 
-    if #customCooldownViewerIcons > 0 then
+    if #customCooldownViewerIcons == 0 then
+        BCDM.CustomCooldownViewerContainer:SetSize(1, 1)
+    else
         local totalWidth, totalHeight = 0, 0
         if growthDirection == "RIGHT" or growthDirection == "LEFT" then
             totalWidth = (#customCooldownViewerIcons * iconSize) + ((#customCooldownViewerIcons - 1) * iconSpacing)
@@ -215,13 +229,8 @@ local function LayoutCustomCooldownViewer()
             totalWidth = iconSize
             totalHeight = (#customCooldownViewerIcons * iconSize) + ((#customCooldownViewerIcons - 1) * iconSpacing)
         end
-        BCDM.CustomCooldownViewerContainer:SetWidth(totalWidth)
-        BCDM.CustomCooldownViewerContainer:SetHeight(totalHeight)
-    else
-        BCDM.CustomCooldownViewerContainer:SetWidth(1)
-        BCDM.CustomCooldownViewerContainer:SetHeight(1)
+        BCDM.CustomCooldownViewerContainer:SetSize(totalWidth, totalHeight)
     end
-
 
     BCDM.CustomCooldownViewerContainer:Show()
 end

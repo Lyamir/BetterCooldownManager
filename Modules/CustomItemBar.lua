@@ -172,7 +172,19 @@ local function LayoutCustomItemBar()
     }
 
     local containerAnchorFrom = CustomDB.Layout[1]
-    if growthDirection == "LEFT" then containerAnchorFrom = anchorFlipMap[CustomDB.Layout[1]] or CustomDB.Layout[1] end
+    if growthDirection == "LEFT" then
+        containerAnchorFrom = anchorFlipMap[CustomDB.Layout[1]] or CustomDB.Layout[1]
+    elseif growthDirection == "UP" then
+        local verticalFlipMap = {
+            ["TOPLEFT"] = "BOTTOMLEFT",
+            ["TOP"] = "BOTTOM",
+            ["TOPRIGHT"] = "BOTTOMRIGHT",
+            ["BOTTOMLEFT"] = "TOPLEFT",
+            ["BOTTOM"] = "TOP",
+            ["BOTTOMRIGHT"] = "TOPRIGHT",
+        }
+        containerAnchorFrom = verticalFlipMap[CustomDB.Layout[1]] or CustomDB.Layout[1]
+    end
 
     if not BCDM.CustomItemBarContainer then
         BCDM.CustomItemBarContainer = CreateFrame("Frame", "BCDM_CustomItemBar", UIParent, "BackdropTemplate")
