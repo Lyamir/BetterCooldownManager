@@ -199,6 +199,8 @@ end
 function BCDM:CreateTicks(count)
     BCDM:ClearTicks()
     if count <= 1 then return end
+    if not count or count <= 1 then return end
+    if count > 10 then count = 10 end
     local width = BCDM.SecondaryPowerBar.Status:GetWidth()
     for i = 1, count - 1 do
         local tick = BCDM.SecondaryPowerBar.Ticks[i]
