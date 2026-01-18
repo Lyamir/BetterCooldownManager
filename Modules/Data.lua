@@ -259,9 +259,9 @@ function BCDM:AddRecommendedItems()
     end
 end
 
-function BCDM:AddRecommendedSpells()
+function BCDM:AddRecommendedSpells(customDB)
     local CooldownManagerDB = BCDM.db.profile
-    local CustomDB = CooldownManagerDB.CooldownManager.Custom
+    local CustomDB = CooldownManagerDB.CooldownManager[customDB]
     local _, playerClass = UnitClass("player")
     local playerSpecialization = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
     if BCDM.DEFENSIVE_SPELLS[playerClass] and BCDM.DEFENSIVE_SPELLS[playerClass][playerSpecialization] then

@@ -88,7 +88,7 @@ local AnchorParents = {
         ["BCDM_CastBar"] = "|cFF8080FFBetter|rCooldownManager: Cast Bar",
     },
     { "EssentialCooldownViewer", "UtilityCooldownViewer", "BCDM_PowerBar", "BCDM_SecondaryPowerBar", "BCDM_CastBar" },
-},
+    },
     ["Custom"] = {
         {
             ["EssentialCooldownViewer"] = "|cFF00AEF7Blizzard|r: Essential Cooldown Viewer",
@@ -97,6 +97,15 @@ local AnchorParents = {
             ["BCDM_SecondaryPowerBar"] = "|cFF8080FFBetter|rCooldownManager: Secondary Power Bar",
         },
         { "EssentialCooldownViewer", "UtilityCooldownViewer", "BCDM_PowerBar", "BCDM_SecondaryPowerBar" },
+    },
+    ["AdditionalCustom"] = {
+    {
+        ["EssentialCooldownViewer"] = "|cFF00AEF7Blizzard|r: Essential Cooldown Viewer",
+        ["UtilityCooldownViewer"] = "|cFF00AEF7Blizzard|r: Utility Cooldown Viewer",
+        ["BCDM_PowerBar"] = "|cFF8080FFBetter|rCooldownManager: Power Bar",
+        ["BCDM_SecondaryPowerBar"] = "|cFF8080FFBetter|rCooldownManager: Secondary Power Bar",
+    },
+    { "EssentialCooldownViewer", "UtilityCooldownViewer", "BCDM_PowerBar", "BCDM_SecondaryPowerBar" },
     },
     ["Item"] = {
         {
@@ -834,8 +843,8 @@ local function CreateCooldownViewerTextSettings(parentContainer, viewerType)
     return textContainer
 end
 
-local function CreateCooldownViewerSpellSettings(parentContainer, containerToRefresh)
-    local SpellDB = BCDM.db.profile.CooldownManager.Custom.Spells
+local function CreateCooldownViewerSpellSettings(parentContainer, customDB, containerToRefresh)
+    local SpellDB = BCDM.db.profile.CooldownManager[customDB].Spells
 
     local playerClass = select(2, UnitClass("player"))
     local playerSpecialization = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
@@ -847,10 +856,10 @@ local function CreateCooldownViewerSpellSettings(parentContainer, containerToRef
         local input = self:GetText()
         local spellId = FetchSpellID(input)
         if spellId then
-            BCDM:AdjustSpellList(spellId, "add")
-            BCDM:UpdateCooldownViewer("Custom")
+            BCDM:AdjustSpellList(spellId, "add", customDB)
+            BCDM:UpdateCooldownViewer(customDB)
             parentContainer:ReleaseChildren()
-            CreateCooldownViewerSpellSettings(parentContainer, containerToRefresh)
+            CreateCooldownViewerSpellSettings(parentContainer, customDB, containerToRefresh)
             self:SetText("")
         end
     end)
@@ -860,10 +869,10 @@ local function CreateCooldownViewerSpellSettings(parentContainer, containerToRef
     addRecommendedButton:SetText("Add Recommended Spells")
     addRecommendedButton:SetRelativeWidth(0.5)
     addRecommendedButton:SetCallback("OnClick", function()
-        BCDM:AddRecommendedSpells()
-        BCDM:UpdateCooldownViewer("Custom")
+        BCDM:AddRecommendedSpells(customDB)
+        BCDM:UpdateCooldownViewer(customDB)
         parentContainer:ReleaseChildren()
-        CreateCooldownViewerSpellSettings(parentContainer, containerToRefresh)
+        CreateCooldownViewerSpellSettings(parentContainer, customDB, containerToRefresh)
     end)
     parentContainer:AddChild(addRecommendedButton)
 
@@ -888,23 +897,23 @@ local function CreateCooldownViewerSpellSettings(parentContainer, containerToRef
             local moveUpButton = AG:Create("Button")
             moveUpButton:SetText("Up")
             moveUpButton:SetRelativeWidth(0.1333)
-            moveUpButton:SetCallback("OnClick", function() BCDM:AdjustSpellLayoutIndex(-1, spellId) parentContainer:ReleaseChildren() CreateCooldownViewerSpellSettings(parentContainer, containerToRefresh) end)
+            moveUpButton:SetCallback("OnClick", function() BCDM:AdjustSpellLayoutIndex(-1, spellId, customDB) parentContainer:ReleaseChildren() CreateCooldownViewerSpellSettings(parentContainer, customDB, containerToRefresh) end)
             parentContainer:AddChild(moveUpButton)
 
             local moveDownButton = AG:Create("Button")
             moveDownButton:SetText("Down")
             moveDownButton:SetRelativeWidth(0.1333)
-            moveDownButton:SetCallback("OnClick", function() BCDM:AdjustSpellLayoutIndex(1, spellId) parentContainer:ReleaseChildren() CreateCooldownViewerSpellSettings(parentContainer, containerToRefresh) end)
+            moveDownButton:SetCallback("OnClick", function() BCDM:AdjustSpellLayoutIndex(1, spellId, customDB) parentContainer:ReleaseChildren() CreateCooldownViewerSpellSettings(parentContainer, customDB, containerToRefresh) end)
             parentContainer:AddChild(moveDownButton)
 
             local removeSpellButton = AG:Create("Button")
             removeSpellButton:SetText("X")
             removeSpellButton:SetRelativeWidth(0.1333)
             removeSpellButton:SetCallback("OnClick", function()
-                BCDM:AdjustSpellList(spellId, "remove")
-                BCDM:UpdateCooldownViewer("Custom")
+                BCDM:AdjustSpellList(spellId, "remove", customDB)
+                BCDM:UpdateCooldownViewer(customDB)
                 parentContainer:ReleaseChildren()
-                CreateCooldownViewerSpellSettings(parentContainer, containerToRefresh)
+                CreateCooldownViewerSpellSettings(parentContainer, customDB, containerToRefresh)
             end)
             parentContainer:AddChild(removeSpellButton)
         end
@@ -994,8 +1003,8 @@ local function CreateCooldownViewerItemSettings(parentContainer, containerToRefr
 end
 
 local function CreateCooldownViewerSettings(parentContainer, viewerType)
-    local hasAnchorParent = viewerType == "Utility" or viewerType == "Buffs" or viewerType == "BuffBar" or viewerType == "Custom" or viewerType == "Item"
-    local isCustomViewer = viewerType == "Custom" or viewerType == "Item"
+    local hasAnchorParent = viewerType == "Utility" or viewerType == "Buffs" or viewerType == "Custom" or viewerType == "AdditionalCustom" or viewerType == "Item"
+    local isCustomViewer = viewerType == "Custom" or viewerType == "AdditionalCustom" or viewerType == "Item"
 
     local ScrollFrame = AG:Create("ScrollFrame")
     ScrollFrame:SetLayout("Flow")
@@ -1031,47 +1040,47 @@ local function CreateCooldownViewerSettings(parentContainer, viewerType)
         toggleContainer:AddChild(centerBuffsCheckbox)
     end
 
-    local foregroundColourPicker;
+    -- local foregroundColourPicker;
 
-    if viewerType == "BuffBar" then
-        local toggleContainer = AG:Create("InlineGroup")
-        toggleContainer:SetTitle("Buff Bar Viewer Settings")
-        toggleContainer:SetFullWidth(true)
-        toggleContainer:SetLayout("Flow")
-        ScrollFrame:AddChild(toggleContainer)
+    -- if viewerType == "BuffBar" then
+    --     local toggleContainer = AG:Create("InlineGroup")
+    --     toggleContainer:SetTitle("Buff Bar Viewer Settings")
+    --     toggleContainer:SetFullWidth(true)
+    --     toggleContainer:SetLayout("Flow")
+    --     ScrollFrame:AddChild(toggleContainer)
 
-        local matchWidthOfAnchorCheckBox = AG:Create("CheckBox")
-        matchWidthOfAnchorCheckBox:SetLabel("Match Width of Anchor")
-        matchWidthOfAnchorCheckBox:SetValue(BCDM.db.profile.CooldownManager.BuffBar.MatchWidthOfAnchor)
-        matchWidthOfAnchorCheckBox:SetCallback("OnValueChanged", function(_, _, value) BCDM.db.profile.CooldownManager.BuffBar.MatchWidthOfAnchor = value BCDM:UpdateCooldownViewer("BuffBar") RefreshBuffBarGUISettings() end)
-        matchWidthOfAnchorCheckBox:SetRelativeWidth(0.5)
-        toggleContainer:AddChild(matchWidthOfAnchorCheckBox)
+    --     local matchWidthOfAnchorCheckBox = AG:Create("CheckBox")
+    --     matchWidthOfAnchorCheckBox:SetLabel("Match Width of Anchor")
+    --     matchWidthOfAnchorCheckBox:SetValue(BCDM.db.profile.CooldownManager.BuffBar.MatchWidthOfAnchor)
+    --     matchWidthOfAnchorCheckBox:SetCallback("OnValueChanged", function(_, _, value) BCDM.db.profile.CooldownManager.BuffBar.MatchWidthOfAnchor = value BCDM:UpdateCooldownViewer("BuffBar") RefreshBuffBarGUISettings() end)
+    --     matchWidthOfAnchorCheckBox:SetRelativeWidth(0.5)
+    --     toggleContainer:AddChild(matchWidthOfAnchorCheckBox)
 
-        local colourByClassCheckbox = AG:Create("CheckBox")
-        colourByClassCheckbox:SetLabel("Colour Bar by Class")
-        colourByClassCheckbox:SetValue(BCDM.db.profile.CooldownManager.BuffBar.ColourByClass)
-        colourByClassCheckbox:SetCallback("OnValueChanged", function(_, _, value) BCDM.db.profile.CooldownManager.BuffBar.ColourByClass = value BCDM:UpdateCooldownViewer("BuffBar") RefreshBuffBarGUISettings() end)
-        colourByClassCheckbox:SetRelativeWidth(0.5)
-        toggleContainer:AddChild(colourByClassCheckbox)
+    --     local colourByClassCheckbox = AG:Create("CheckBox")
+    --     colourByClassCheckbox:SetLabel("Colour Bar by Class")
+    --     colourByClassCheckbox:SetValue(BCDM.db.profile.CooldownManager.BuffBar.ColourByClass)
+    --     colourByClassCheckbox:SetCallback("OnValueChanged", function(_, _, value) BCDM.db.profile.CooldownManager.BuffBar.ColourByClass = value BCDM:UpdateCooldownViewer("BuffBar") RefreshBuffBarGUISettings() end)
+    --     colourByClassCheckbox:SetRelativeWidth(0.5)
+    --     toggleContainer:AddChild(colourByClassCheckbox)
 
-        foregroundColourPicker = AG:Create("ColorPicker")
-        foregroundColourPicker:SetLabel("Foreground Colour")
-        local r, g, b = unpack(BCDM.db.profile.CooldownManager.BuffBar.ForegroundColour)
-        foregroundColourPicker:SetColor(r, g, b)
-        foregroundColourPicker:SetCallback("OnValueChanged", function(self, _, r, g, b, a) BCDM.db.profile.CooldownManager.BuffBar.ForegroundColour = {r, g, b, a} BCDM:UpdateCooldownViewer("BuffBar") end)
-        foregroundColourPicker:SetRelativeWidth(0.5)
-        foregroundColourPicker:SetHasAlpha(false)
-        toggleContainer:AddChild(foregroundColourPicker)
+    --     foregroundColourPicker = AG:Create("ColorPicker")
+    --     foregroundColourPicker:SetLabel("Foreground Colour")
+    --     local r, g, b = unpack(BCDM.db.profile.CooldownManager.BuffBar.ForegroundColour)
+    --     foregroundColourPicker:SetColor(r, g, b)
+    --     foregroundColourPicker:SetCallback("OnValueChanged", function(self, _, r, g, b, a) BCDM.db.profile.CooldownManager.BuffBar.ForegroundColour = {r, g, b, a} BCDM:UpdateCooldownViewer("BuffBar") end)
+    --     foregroundColourPicker:SetRelativeWidth(0.5)
+    --     foregroundColourPicker:SetHasAlpha(false)
+    --     toggleContainer:AddChild(foregroundColourPicker)
 
-        local backgroundColourPicker = AG:Create("ColorPicker")
-        backgroundColourPicker:SetLabel("Background Colour")
-        local br, bg, bb = unpack(BCDM.db.profile.CooldownManager.BuffBar.BackgroundColour)
-        backgroundColourPicker:SetColor(br, bg, bb)
-        backgroundColourPicker:SetCallback("OnValueChanged", function(self, _, r, g, b, a) BCDM.db.profile.CooldownManager.BuffBar.BackgroundColour = {r, g, b, a} BCDM:UpdateCooldownViewer("BuffBar") end)
-        backgroundColourPicker:SetRelativeWidth(0.5)
-        backgroundColourPicker:SetHasAlpha(true)
-        toggleContainer:AddChild(backgroundColourPicker)
-    end
+    --     local backgroundColourPicker = AG:Create("ColorPicker")
+    --     backgroundColourPicker:SetLabel("Background Colour")
+    --     local br, bg, bb = unpack(BCDM.db.profile.CooldownManager.BuffBar.BackgroundColour)
+    --     backgroundColourPicker:SetColor(br, bg, bb)
+    --     backgroundColourPicker:SetCallback("OnValueChanged", function(self, _, r, g, b, a) BCDM.db.profile.CooldownManager.BuffBar.BackgroundColour = {r, g, b, a} BCDM:UpdateCooldownViewer("BuffBar") end)
+    --     backgroundColourPicker:SetRelativeWidth(0.5)
+    --     backgroundColourPicker:SetHasAlpha(true)
+    --     toggleContainer:AddChild(backgroundColourPicker)
+    -- end
 
     local layoutContainer = AG:Create("InlineGroup")
     layoutContainer:SetTitle("Layout & Positioning")
@@ -1152,13 +1161,13 @@ local function CreateCooldownViewerSettings(parentContainer, viewerType)
 
     CreateCooldownViewerTextSettings(ScrollFrame, viewerType)
 
-    if viewerType == "Custom" then
+    if viewerType == "Custom" or viewerType == "AdditionalCustom" then
         local spellContainer = AG:Create("InlineGroup")
         spellContainer:SetTitle("Custom Spells")
         spellContainer:SetFullWidth(true)
         spellContainer:SetLayout("Flow")
         ScrollFrame:AddChild(spellContainer)
-        CreateCooldownViewerSpellSettings(spellContainer, ScrollFrame)
+        CreateCooldownViewerSpellSettings(spellContainer, viewerType, ScrollFrame)
     end
 
     if viewerType == "Item" then
@@ -2253,6 +2262,8 @@ function BCDM:CreateGUI()
             CreateCooldownViewerSettings(Wrapper, "Buffs")
         elseif MainTab == "Custom" then
             CreateCooldownViewerSettings(Wrapper, "Custom")
+        elseif MainTab == "AdditionalCustom" then
+            CreateCooldownViewerSettings(Wrapper, "AdditionalCustom")
         elseif MainTab == "Item" then
             CreateCooldownViewerSettings(Wrapper, "Item")
         elseif MainTab == "PowerBar" then
@@ -2283,6 +2294,7 @@ function BCDM:CreateGUI()
         { text = "Utility", value = "Utility"},
         { text = "Buffs", value = "Buffs"},
         { text = "Custom", value = "Custom"},
+        { text = "Additional Custom", value = "AdditionalCustom"},
         { text = "Item", value = "Item"},
         { text = "Power Bar", value = "PowerBar"},
         { text = "Secondary Power Bar", value = "SecondaryPowerBar"},

@@ -314,6 +314,7 @@ function BCDM:UpdateCooldownViewer(viewerType)
     local cooldownManagerSettings = BCDM.db.profile.CooldownManager
     local cooldownViewerFrame = _G[BCDM.DBViewerToCooldownManagerViewer[viewerType]]
     if viewerType == "Custom" then BCDM:UpdateCustomCooldownViewer() return end
+    if viewerType == "AdditionalCustom" then BCDM:UpdateAdditionalCustomCooldownViewer() return end
     if viewerType == "Item" then BCDM:UpdateCustomItemBar() return end
     if viewerType == "Buffs" then SetupCenterBuffs() end
     for _, childFrame in ipairs({cooldownViewerFrame:GetChildren()}) do

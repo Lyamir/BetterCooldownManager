@@ -152,6 +152,7 @@ function BCDM:UpdateBCDM()
     BCDM:UpdateSecondaryPowerBar()
     BCDM:UpdateCastBar()
     BCDM:UpdateCustomCooldownViewer()
+    BCDM:UpdateAdditionalCustomCooldownViewer()
     BCDM:UpdateCustomItemBar()
 end
 
@@ -271,4 +272,65 @@ function BCDM:CreatePrompt(title, text, onAccept, onCancel, acceptText, cancelTe
         promptDialog:SetFrameStrata("TOOLTIP")
     end
     return promptDialog
+end
+
+function BCDM:AdjustSpellLayoutIndex(direction, spellId, customDB)
+    local CooldownManagerDB = BCDM.db.profile
+    local CustomDB = CooldownManagerDB.CooldownManager[customDB]
+    local playerClass = select(2, UnitClass("player"))
+    local playerSpecialization = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
+    local DefensiveSpells = CustomDB.Spells
+
+    if not DefensiveSpells[playerClass] or not DefensiveSpells[playerClass][playerSpecialization] or not DefensiveSpells[playerClass][playerSpecialization][spellId] then return end
+
+    local currentIndex = DefensiveSpells[playerClass][playerSpecialization][spellId].layoutIndex
+    local newIndex = currentIndex + direction
+
+    local totalSpells = 0
+
+    for _ in pairs(DefensiveSpells[playerClass][playerSpecialization]) do totalSpells = totalSpells + 1 end
+    if newIndex < 1 or newIndex > totalSpells then return end
+
+    for _, data in pairs(DefensiveSpells[playerClass][playerSpecialization]) do
+        if data.layoutIndex == newIndex then
+            data.layoutIndex = currentIndex
+            break
+        end
+    end
+
+    DefensiveSpells[playerClass][playerSpecialization][spellId].layoutIndex = newIndex
+    if customDB == "Custom" then
+        BCDM:UpdateCustomCooldownViewer()
+    else
+        BCDM:UpdateAdditionalCustomCooldownViewer()
+    end
+end
+
+function BCDM:AdjustSpellList(spellId, adjustingHow, customDB)
+    local CooldownManagerDB = BCDM.db.profile
+    local CustomDB = CooldownManagerDB.CooldownManager[customDB]
+    local playerClass = select(2, UnitClass("player"))
+    local playerSpecialization = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
+    local DefensiveSpells = CustomDB.Spells
+
+    if not DefensiveSpells[playerClass] then
+        DefensiveSpells[playerClass] = {}
+    end
+    if not DefensiveSpells[playerClass][playerSpecialization] then
+        DefensiveSpells[playerClass][playerSpecialization] = {}
+    end
+
+    if adjustingHow == "add" then
+        local maxIndex = 0
+        for _, data in pairs(DefensiveSpells[playerClass][playerSpecialization]) do
+            if data.layoutIndex > maxIndex then
+                maxIndex = data.layoutIndex
+            end
+        end
+        DefensiveSpells[playerClass][playerSpecialization][spellId] = { isActive = true, layoutIndex = maxIndex + 1 }
+    elseif adjustingHow == "remove" then
+        DefensiveSpells[playerClass][playerSpecialization][spellId] = nil
+    end
+
+    BCDM:UpdateAdditionalCustomCooldownViewer()
 end

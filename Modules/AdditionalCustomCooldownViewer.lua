@@ -13,7 +13,7 @@ local function ApplyCooldownText()
     local CooldownManagerDB = BCDM.db.profile
     local GeneralDB = CooldownManagerDB.General
     local CooldownTextDB = CooldownManagerDB.CooldownManager.General.CooldownText
-    local Viewer = _G["BCDM_CustomCooldownViewer"]
+    local Viewer = _G["BCDM_AdditionalCustomCooldownViewer"]
     if not Viewer then return end
     for _, icon in ipairs({ Viewer:GetChildren() }) do
         if icon and icon.Cooldown then
@@ -54,11 +54,11 @@ end
 local function CreateCustomIcon(spellId)
     local CooldownManagerDB = BCDM.db.profile
     local GeneralDB = CooldownManagerDB.General
-    local CustomDB = CooldownManagerDB.CooldownManager.Custom
+    local CustomDB = CooldownManagerDB.CooldownManager.AdditionalCustom
     if not spellId then return end
     if not C_SpellBook.IsSpellInSpellBook(spellId) then return end
 
-    local customIcon = CreateFrame("Button", "BCDM_Custom_" .. spellId, UIParent, "BackdropTemplate")
+    local customIcon = CreateFrame("Button", "BCDM_AdditionalCustom_" .. spellId, UIParent, "BackdropTemplate")
     customIcon:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = BCDM.db.profile.CooldownManager.General.BorderSize, insets = { left = 0, right = 0, top = 0, bottom = 0 } })
     customIcon:SetBackdropColor(0, 0, 0, 0)
     if BCDM.db.profile.CooldownManager.General.BorderSize <= 0 then
@@ -124,7 +124,7 @@ end
 local function CreateCustomIcons(iconTable)
     local playerClass = select(2, UnitClass("player"))
     local playerSpecialization = select(2, GetSpecializationInfo(GetSpecialization())):gsub(" ", ""):upper()
-    local DefensiveSpells = BCDM.db.profile.CooldownManager.Custom.Spells
+    local DefensiveSpells = BCDM.db.profile.CooldownManager.AdditionalCustom.Spells
 
     wipe(iconTable)
 
@@ -149,10 +149,10 @@ local function CreateCustomIcons(iconTable)
     end
 end
 
-local function LayoutCustomCooldownViewer()
+local function LayoutAdditionalCustomCooldownViewer()
     local CooldownManagerDB = BCDM.db.profile
-    local CustomDB = CooldownManagerDB.CooldownManager.Custom
-    local customCooldownViewerIcons = {}
+    local CustomDB = CooldownManagerDB.CooldownManager.AdditionalCustom
+    local AdditionalCustomCooldownViewerIcons = {}
 
     local growthDirection = CustomDB.GrowthDirection or "RIGHT"
 
@@ -169,38 +169,38 @@ local function LayoutCustomCooldownViewer()
         containerAnchorFrom = verticalFlipMap[CustomDB.Layout[1]] or CustomDB.Layout[1]
     end
 
-    if not BCDM.CustomCooldownViewerContainer then
-        BCDM.CustomCooldownViewerContainer = CreateFrame("Frame", "BCDM_CustomCooldownViewer", UIParent, "BackdropTemplate")
-        BCDM.CustomCooldownViewerContainer:SetSize(1, 1)
-        BCDM.CustomCooldownViewerContainer:SetFrameStrata("LOW")
+    if not BCDM.AdditionalCustomCooldownViewerContainer then
+        BCDM.AdditionalCustomCooldownViewerContainer = CreateFrame("Frame", "BCDM_AdditionalCustomCooldownViewer", UIParent, "BackdropTemplate")
+        BCDM.AdditionalCustomCooldownViewerContainer:SetSize(1, 1)
+        BCDM.AdditionalCustomCooldownViewerContainer:SetFrameStrata("LOW")
     end
 
-    BCDM.CustomCooldownViewerContainer:ClearAllPoints()
-    BCDM.CustomCooldownViewerContainer:SetPoint(containerAnchorFrom, _G[CustomDB.Layout[2]], CustomDB.Layout[3], CustomDB.Layout[4], CustomDB.Layout[5])
+    BCDM.AdditionalCustomCooldownViewerContainer:ClearAllPoints()
+    BCDM.AdditionalCustomCooldownViewerContainer:SetPoint(containerAnchorFrom, _G[CustomDB.Layout[2]], CustomDB.Layout[3], CustomDB.Layout[4], CustomDB.Layout[5])
 
-    for _, child in ipairs({BCDM.CustomCooldownViewerContainer:GetChildren()}) do child:UnregisterAllEvents() child:Hide() child:SetParent(nil) end
+    for _, child in ipairs({BCDM.AdditionalCustomCooldownViewerContainer:GetChildren()}) do child:UnregisterAllEvents() child:Hide() child:SetParent(nil) end
 
-    CreateCustomIcons(customCooldownViewerIcons)
+    CreateCustomIcons(AdditionalCustomCooldownViewerIcons)
 
     local iconSize = CustomDB.IconSize
     local iconSpacing = CustomDB.Spacing
 
     -- Calculate and set container size first
-    if #customCooldownViewerIcons == 0 then
-        BCDM.CustomCooldownViewerContainer:SetSize(1, 1)
+    if #AdditionalCustomCooldownViewerIcons == 0 then
+        BCDM.AdditionalCustomCooldownViewerContainer:SetSize(1, 1)
     else
-        local point = select(1, BCDM.CustomCooldownViewerContainer:GetPoint(1))
+        local point = select(1, BCDM.AdditionalCustomCooldownViewerContainer:GetPoint(1))
         local useCenteredLayout = (point == "TOP" or point == "BOTTOM") and (growthDirection == "LEFT" or growthDirection == "RIGHT")
 
         local totalWidth, totalHeight = 0, 0
         if useCenteredLayout or growthDirection == "RIGHT" or growthDirection == "LEFT" then
-            totalWidth = (#customCooldownViewerIcons * iconSize) + ((#customCooldownViewerIcons - 1) * iconSpacing)
+            totalWidth = (#AdditionalCustomCooldownViewerIcons * iconSize) + ((#AdditionalCustomCooldownViewerIcons - 1) * iconSpacing)
             totalHeight = iconSize
         elseif growthDirection == "UP" or growthDirection == "DOWN" then
             totalWidth = iconSize
-            totalHeight = (#customCooldownViewerIcons * iconSize) + ((#customCooldownViewerIcons - 1) * iconSpacing)
+            totalHeight = (#AdditionalCustomCooldownViewerIcons * iconSize) + ((#AdditionalCustomCooldownViewerIcons - 1) * iconSpacing)
         end
-        BCDM.CustomCooldownViewerContainer:SetSize(totalWidth, totalHeight)
+        BCDM.AdditionalCustomCooldownViewerContainer:SetSize(totalWidth, totalHeight)
     end
 
     local LayoutConfig = {
@@ -215,41 +215,41 @@ local function LayoutCustomCooldownViewer()
         CENTER      = { anchor="CENTER",      xMult=0,  yMult=0  },
     }
 
-    local point = select(1, BCDM.CustomCooldownViewerContainer:GetPoint(1))
+    local point = select(1, BCDM.AdditionalCustomCooldownViewerContainer:GetPoint(1))
     local useCenteredLayout = (point == "TOP" or point == "BOTTOM") and (growthDirection == "LEFT" or growthDirection == "RIGHT")
 
-    if useCenteredLayout and #customCooldownViewerIcons > 0 then
-        local totalWidth = (#customCooldownViewerIcons * iconSize) + ((#customCooldownViewerIcons - 1) * iconSpacing)
+    if useCenteredLayout and #AdditionalCustomCooldownViewerIcons > 0 then
+        local totalWidth = (#AdditionalCustomCooldownViewerIcons * iconSize) + ((#AdditionalCustomCooldownViewerIcons - 1) * iconSpacing)
         local startOffset = -(totalWidth / 2) + (iconSize / 2)
 
-        for i, spellIcon in ipairs(customCooldownViewerIcons) do
-            spellIcon:SetParent(BCDM.CustomCooldownViewerContainer)
+        for i, spellIcon in ipairs(AdditionalCustomCooldownViewerIcons) do
+            spellIcon:SetParent(BCDM.AdditionalCustomCooldownViewerContainer)
             spellIcon:SetSize(iconSize, iconSize)
             spellIcon:ClearAllPoints()
 
             local xOffset = startOffset + ((i - 1) * (iconSize + iconSpacing))
-            spellIcon:SetPoint("CENTER", BCDM.CustomCooldownViewerContainer, "CENTER", xOffset, 0)
+            spellIcon:SetPoint("CENTER", BCDM.AdditionalCustomCooldownViewerContainer, "CENTER", xOffset, 0)
             ApplyCooldownText()
             spellIcon:Show()
         end
     else
-        for i, spellIcon in ipairs(customCooldownViewerIcons) do
-            spellIcon:SetParent(BCDM.CustomCooldownViewerContainer)
+        for i, spellIcon in ipairs(AdditionalCustomCooldownViewerIcons) do
+            spellIcon:SetParent(BCDM.AdditionalCustomCooldownViewerContainer)
             spellIcon:SetSize(iconSize, iconSize)
             spellIcon:ClearAllPoints()
 
             if i == 1 then
                 local config = LayoutConfig[point] or LayoutConfig.TOPLEFT
-                spellIcon:SetPoint(config.anchor, BCDM.CustomCooldownViewerContainer, config.anchor, 0, 0)
+                spellIcon:SetPoint(config.anchor, BCDM.AdditionalCustomCooldownViewerContainer, config.anchor, 0, 0)
             else
                 if growthDirection == "RIGHT" then
-                    spellIcon:SetPoint("LEFT", customCooldownViewerIcons[i - 1], "RIGHT", iconSpacing, 0)
+                    spellIcon:SetPoint("LEFT", AdditionalCustomCooldownViewerIcons[i - 1], "RIGHT", iconSpacing, 0)
                 elseif growthDirection == "LEFT" then
-                    spellIcon:SetPoint("RIGHT", customCooldownViewerIcons[i - 1], "LEFT", -iconSpacing, 0)
+                    spellIcon:SetPoint("RIGHT", AdditionalCustomCooldownViewerIcons[i - 1], "LEFT", -iconSpacing, 0)
                 elseif growthDirection == "UP" then
-                    spellIcon:SetPoint("BOTTOM", customCooldownViewerIcons[i - 1], "TOP", 0, iconSpacing)
+                    spellIcon:SetPoint("BOTTOM", AdditionalCustomCooldownViewerIcons[i - 1], "TOP", 0, iconSpacing)
                 elseif growthDirection == "DOWN" then
-                    spellIcon:SetPoint("TOP", customCooldownViewerIcons[i - 1], "BOTTOM", 0, -iconSpacing)
+                    spellIcon:SetPoint("TOP", AdditionalCustomCooldownViewerIcons[i - 1], "BOTTOM", 0, -iconSpacing)
                 end
             end
             ApplyCooldownText()
@@ -257,19 +257,19 @@ local function LayoutCustomCooldownViewer()
         end
     end
 
-    BCDM.CustomCooldownViewerContainer:Show()
+    BCDM.AdditionalCustomCooldownViewerContainer:Show()
 end
 
-function BCDM:SetupCustomCooldownViewer()
-    LayoutCustomCooldownViewer()
+function BCDM:SetupAdditionalCustomCooldownViewer()
+    LayoutAdditionalCustomCooldownViewer()
 end
 
-function BCDM:UpdateCustomCooldownViewer()
+function BCDM:UpdateAdditionalCustomCooldownViewer()
     local CooldownManagerDB = BCDM.db.profile
-    local CustomDB = CooldownManagerDB.CooldownManager.Custom
-    if BCDM.CustomCooldownViewerContainer then
-        BCDM.CustomCooldownViewerContainer:ClearAllPoints()
-        BCDM.CustomCooldownViewerContainer:SetPoint(CustomDB.Layout[1], _G[CustomDB.Layout[2]], CustomDB.Layout[3], CustomDB.Layout[4], CustomDB.Layout[5])
+    local CustomDB = CooldownManagerDB.CooldownManager.AdditionalCustom
+    if BCDM.AdditionalCustomCooldownViewerContainer then
+        BCDM.AdditionalCustomCooldownViewerContainer:ClearAllPoints()
+        BCDM.AdditionalCustomCooldownViewerContainer:SetPoint(CustomDB.Layout[1], _G[CustomDB.Layout[2]], CustomDB.Layout[3], CustomDB.Layout[4], CustomDB.Layout[5])
     end
-    LayoutCustomCooldownViewer()
+    LayoutAdditionalCustomCooldownViewer()
 end

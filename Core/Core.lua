@@ -31,6 +31,7 @@ function BetterCooldownManager:OnEnable()
     for _, AddOn in ipairs(SUPPORTED_ADDONS) do
         EventUtil.ContinueOnAddOnLoaded(AddOn, function()
             BCDM:SetupCustomCooldownViewer()
+            BCDM:SetupAdditionalCustomCooldownViewer()
             BCDM:SetupCustomItemBar()
             BCDM:CreateCooldownViewerOverlays()
         end)

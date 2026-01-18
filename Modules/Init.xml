@@ -2,6 +2,7 @@
 	<Script file="CastBar.lua"/>
 	<Script file="CooldownManager.lua"/>
 	<Script file="Data.lua"/>
+	<Script file="AdditionalCustomCooldownViewer.lua"/>
 	<Script file="CustomCooldownViewer.lua"/>
 	<Script file="CustomItemBar.lua"/>
 	<Script file="PowerBar.lua"/>

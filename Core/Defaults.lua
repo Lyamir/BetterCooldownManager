@@ -250,6 +250,98 @@ local Defaults = {
                     }
                 },
             },
+            AdditionalCustom = {
+                IconSize = 38,
+                Layout = {"TOP", "UtilityCooldownViewer", "BOTTOM", 0, -1},
+                Spacing = 1,
+                GrowthDirection = "RIGHT",
+                Text = {
+                    FontSize = 12,
+                    Colour = {1, 1, 1},
+                    Layout = {"BOTTOMRIGHT", "BOTTOMRIGHT", 0, 2}
+                },
+                Spells = {
+                    -- Monk
+                    ["MONK"] = {
+                        ["BREWMASTER"] = {},
+                        ["WINDWALKER"] = {},
+                        ["MISTWEAVER"] = {},
+                    },
+                    -- Demon Hunter
+                    ["DEMONHUNTER"] = {
+                        ["HAVOC"] = {},
+                        ["VENGEANCE"] = {},
+                        ["DEVOURER"] = {},
+                    },
+                    -- Death Knight
+                    ["DEATHKNIGHT"] = {
+                        ["BLOOD"] = {},
+                        ["UNHOLY"] = {},
+                        ["FROST"] = {}
+                    },
+                    -- Mage
+                    ["MAGE"] = {
+                        ["FROST"] = {},
+                        ["FIRE"] = {},
+                        ["ARCANE"] = {},
+                    },
+                    -- Paladin
+                    ["PALADIN"] = {
+                        ["RETRIBUTION"] = {},
+                        ["HOLY"] = {},
+                        ["PROTECTION"] = {}
+                    },
+                    -- Shaman
+                    ["SHAMAN"] = {
+                        ["ELEMENTAL"] = {},
+                        ["ENHANCEMENT"] = {},
+                        ["RESTORATION"] = {}
+                    },
+                    -- Druid
+                    ["DRUID"] = {
+                        ["GUARDIAN"] = {},
+                        ["FERAL"] = {},
+                        ["RESTORATION"] = {},
+                        ["BALANCE"] = {},
+                    },
+                    -- Evoker
+                    ["EVOKER"] = {
+                        ["DEVASTATION"] = {},
+                        ["AUGMENTATION"] = {},
+                        ["PRESERVATION"] = {}
+                    },
+                    -- Warrior
+                    ["WARRIOR"] = {
+                        ["ARMS"] = {},
+                        ["FURY"] = {},
+                        ["PROTECTION"] = {},
+                    },
+                    -- Priest
+                    ["PRIEST"] = {
+                        ["SHADOW"] = {},
+                        ["DISCIPLINE"] = {},
+                        ["HOLY"] = {},
+                    },
+                    -- Warlock
+                    ["WARLOCK"] = {
+                        ["DESTRUCTION"] = {},
+                        ["AFFLICTION"] = {},
+                        ["DEMONOLOGY"] = {},
+                    },
+                    -- Hunter
+                    ["HUNTER"] = {
+                        ["SURVIVAL"] = {},
+                        ["MARKSMANSHIP"] = {},
+                        ["BEASTMASTERY"] = {},
+                    },
+                    -- Rogue
+                    ["ROGUE"] = {
+                        ["OUTLAW"] = {},
+                        ["ASSASSINATION"] = {},
+                        ["SUBTLETY"] = {},
+                    }
+                },
+            },
             Item = {
                 IconSize = 38,
                 Layout = {"TOPLEFT", "UtilityCooldownViewer", "BOTTOMRIGHT", -1, -1},
