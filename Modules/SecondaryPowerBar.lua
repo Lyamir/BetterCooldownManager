@@ -431,6 +431,7 @@ end
 local function UpdatePowerValues()
     local powerType = DetectSecondaryPower()
     local secondaryPowerBar = BCDM.SecondaryPowerBar
+    local secondaryPowerBarDB = BCDM.db.profile.SecondaryPowerBar
     if not powerType then if secondaryPowerBar then secondaryPowerBar:Hide() end return end
     if not secondaryPowerBar then return end
     local powerCurrent = 0
@@ -548,7 +549,9 @@ local function UpdatePowerValues()
         UpdateRuneDisplay()
     end
 
-    secondaryPowerBar.Status:SetStatusBarColor(GetPowerBarColor())
+    if not (powerType == "STAGGER" and secondaryPowerBarDB.ColourByState) then
+        secondaryPowerBar.Status:SetStatusBarColor(GetPowerBarColor())
+    end
     secondaryPowerBar:Show()
 end
 
@@ -699,6 +702,9 @@ function BCDM:CreateSecondaryPowerBar()
 
         secondaryPowerBar:RegisterEvent("UNIT_POWER_UPDATE")
         secondaryPowerBar:RegisterEvent("UNIT_MAXPOWER")
+        secondaryPowerBar:RegisterEvent("UNIT_HEALTH")
+        secondaryPowerBar:RegisterEvent("UNIT_MAXHEALTH")
+        secondaryPowerBar:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
         secondaryPowerBar:RegisterEvent("PLAYER_ENTERING_WORLD")
         secondaryPowerBar:RegisterEvent("UPDATE_SHAPESHIFT_COOLDOWN")
         secondaryPowerBar:RegisterEvent("RUNE_POWER_UPDATE")
@@ -709,9 +715,14 @@ function BCDM:CreateSecondaryPowerBar()
                 if DetectSecondaryPower() == Enum.PowerType.Runes then
                     UpdateRuneDisplay()
                 end
-            else
-                UpdatePowerValues()
+                return
             end
+            if event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER" or event == "UNIT_HEALTH"
+                or event == "UNIT_MAXHEALTH" or event == "UNIT_ABSORB_AMOUNT_CHANGED" then
+                local unit = ...
+                if unit and unit ~= "player" then return end
+            end
+            UpdatePowerValues()
         end)
     else
         secondaryPowerBar:Hide()
@@ -766,12 +777,26 @@ function BCDM:UpdateSecondaryPowerBar()
     if secondaryPowerBarDB.Enabled then
         secondaryPowerBar:RegisterEvent("UNIT_POWER_UPDATE")
         secondaryPowerBar:RegisterEvent("UNIT_MAXPOWER")
+        secondaryPowerBar:RegisterEvent("UNIT_HEALTH")
+        secondaryPowerBar:RegisterEvent("UNIT_MAXHEALTH")
+        secondaryPowerBar:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
         secondaryPowerBar:RegisterEvent("PLAYER_ENTERING_WORLD")
         secondaryPowerBar:RegisterEvent("UPDATE_SHAPESHIFT_COOLDOWN")
         secondaryPowerBar:RegisterEvent("RUNE_POWER_UPDATE")
         secondaryPowerBar:RegisterEvent("RUNE_TYPE_UPDATE")
 
-        secondaryPowerBar:SetScript("OnEvent", function(self, event, ...) if event == "RUNE_POWER_UPDATE" or event == "RUNE_TYPE_UPDATE" then if DetectSecondaryPower() == Enum.PowerType.Runes then UpdateRuneDisplay() end else UpdatePowerValues() end end)
+        secondaryPowerBar:SetScript("OnEvent", function(self, event, ...)
+            if event == "RUNE_POWER_UPDATE" or event == "RUNE_TYPE_UPDATE" then
+                if DetectSecondaryPower() == Enum.PowerType.Runes then UpdateRuneDisplay() end
+                return
+            end
+            if event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER" or event == "UNIT_HEALTH"
+                or event == "UNIT_MAXHEALTH" or event == "UNIT_ABSORB_AMOUNT_CHANGED" then
+                local unit = ...
+                if unit and unit ~= "player" then return end
+            end
+            UpdatePowerValues()
+        end)
         secondaryPowerBar.Status:SetScript("OnSizeChanged", function()
             CreateTicksBasedOnPowerType()
             local powerType = DetectSecondaryPower()
