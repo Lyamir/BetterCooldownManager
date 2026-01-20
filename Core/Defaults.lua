@@ -369,6 +369,19 @@ local Defaults = {
                 },
                 Trinkets = {},
             },
+            ItemSpell = {
+                IconSize = 38,
+                Layout = {"TOPLEFT", "UtilityCooldownViewer", "BOTTOMRIGHT", -1, -1},
+                Spacing = 1,
+                GrowthDirection = "LEFT",
+                OffsetByParentHeight = true,
+                Text = {
+                    FontSize = 12,
+                    Colour = {1, 1, 1},
+                    Layout = {"BOTTOMRIGHT", "BOTTOMRIGHT", 0, 2}
+                },
+                ItemsSpells = {},
+            },
         },
         PowerBar = {
             Enabled = true,

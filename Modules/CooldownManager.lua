@@ -317,6 +317,7 @@ function BCDM:UpdateCooldownViewer(viewerType)
     if viewerType == "AdditionalCustom" then BCDM:UpdateAdditionalCustomCooldownViewer() return end
     if viewerType == "Item" then BCDM:UpdateCustomItemBar() return end
     if viewerType == "Trinket" then BCDM:UpdateTrinketBar() return end
+    if viewerType == "ItemSpell" then BCDM:UpdateCustomItemsSpellsBar() return end
     if viewerType == "Buffs" then SetupCenterBuffs() end
     for _, childFrame in ipairs({cooldownViewerFrame:GetChildren()}) do
         if childFrame then
@@ -359,6 +360,7 @@ function BCDM:UpdateCooldownViewers()
     BCDM:UpdateCustomCooldownViewer()
     BCDM:UpdateAdditionalCustomCooldownViewer()
     BCDM:UpdateCustomItemBar()
-    BCDM:UpdateCastBar()
+    BCDM:UpdateCustomItemsSpellsBar()
     BCDM:UpdateTrinketBar()
+    BCDM:UpdateCastBar()
 end

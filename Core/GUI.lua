@@ -133,6 +133,17 @@ local AnchorParents = {
         },
         { "EssentialCooldownViewer", "UtilityCooldownViewer", "PlayerFrame", "TargetFrame", "BCDM_PowerBar", "BCDM_SecondaryPowerBar" },
     },
+    ["ItemSpell"] = {
+        {
+            ["EssentialCooldownViewer"] = "|cFF00AEF7Blizzard|r: Essential Cooldown Viewer",
+            ["UtilityCooldownViewer"] = "|cFF00AEF7Blizzard|r: Utility Cooldown Viewer",
+            ["PlayerFrame"] = "|cFF00AEF7Blizzard|r: Player Frame",
+            ["TargetFrame"] = "|cFF00AEF7Blizzard|r: Target Frame",
+            ["BCDM_PowerBar"] = "|cFF8080FFBetter|rCooldownManager: Power Bar",
+            ["BCDM_SecondaryPowerBar"] = "|cFF8080FFBetter|rCooldownManager: Secondary Power Bar",
+        },
+        { "EssentialCooldownViewer", "UtilityCooldownViewer", "PlayerFrame", "TargetFrame", "BCDM_PowerBar", "BCDM_SecondaryPowerBar" },
+    },
     ["Power"] = {
         {
             ["EssentialCooldownViewer"] = "|cFF00AEF7Blizzard|r: Essential Cooldown Viewer",
@@ -250,6 +261,23 @@ local function FetchItemInformation(itemId)
     if itemName then
         return string.format("|T%s:16:16|t %s", itemTexture, itemName)
     end
+end
+
+local function FetchSpellInformation(spellId)
+    local spellData = C_Spell.GetSpellInfo(spellId)
+    if spellData then
+        return string.format("|T%s:16:16|t %s", spellData.iconID, spellData.name)
+    end
+end
+
+local function FetchItemSpellInformation(entryId, entryType)
+    if entryType == "spell" then
+        return FetchSpellInformation(entryId)
+    end
+    if entryType == "item" then
+        return FetchItemInformation(entryId)
+    end
+    return FetchItemInformation(entryId) or FetchSpellInformation(entryId)
 end
 
 local function FetchSpellID(spellIdentifier)
@@ -945,7 +973,7 @@ local function CreateCooldownViewerItemSettings(parentContainer, containerToRefr
     local ItemDB = BCDM.db.profile.CooldownManager.Item.Items
 
     local addItemEditBox = AG:Create("EditBox")
-    addItemEditBox:SetLabel("Add Item by ID or Item Name")
+    addItemEditBox:SetLabel("Add Item by ID")
     addItemEditBox:SetRelativeWidth(0.5)
     addItemEditBox:SetCallback("OnEnterPressed", function(self)
         local input = self:GetText()
@@ -1015,18 +1043,51 @@ local function CreateCooldownViewerItemSettings(parentContainer, containerToRefr
     end
 
     containerToRefresh:DoLayout()
+    parentContainer:DoLayout()
 
     return parentContainer
 end
 
-local function CreateCooldownViewerTrinketSettings(parentContainer, containerToRefresh)
-    local TrinketDB = BCDM.db.profile.CooldownManager.Trinket.Trinkets
+local function CreateCooldownViewerItemSpellSettings(parentContainer, containerToRefresh)
+    local ItemSpellDB = BCDM.db.profile.CooldownManager.ItemSpell.ItemsSpells
 
-    if TrinketDB then
+    local addSpellEditBox = AG:Create("EditBox")
+    addSpellEditBox:SetLabel("Add Spell by ID or Spell Name")
+    addSpellEditBox:SetRelativeWidth(0.5)
+    addSpellEditBox:SetCallback("OnEnterPressed", function(self)
+        local input = self:GetText()
+        local spellId = FetchSpellID(input)
+        if spellId then
+            BCDM:AdjustItemsSpellsList(spellId, "add", "spell")
+            BCDM:UpdateCooldownViewer("ItemSpell")
+            parentContainer:ReleaseChildren()
+            CreateCooldownViewerItemSpellSettings(parentContainer, containerToRefresh)
+            self:SetText("")
+        end
+    end)
+    parentContainer:AddChild(addSpellEditBox)
+
+    local addItemEditBox = AG:Create("EditBox")
+    addItemEditBox:SetLabel("Add Item by ID")
+    addItemEditBox:SetRelativeWidth(0.5)
+    addItemEditBox:SetCallback("OnEnterPressed", function(self)
+        local input = self:GetText()
+        local itemId = tonumber(input)
+        if itemId then
+            BCDM:AdjustItemsSpellsList(itemId, "add", "item")
+            BCDM:UpdateCooldownViewer("ItemSpell")
+            parentContainer:ReleaseChildren()
+            CreateCooldownViewerItemSpellSettings(parentContainer, containerToRefresh)
+            self:SetText("")
+        end
+    end)
+    parentContainer:AddChild(addItemEditBox)
+
+    if ItemSpellDB then
 
         local sortedItems = {}
 
-        for spellId, data in pairs(TrinketDB) do table.insert(sortedItems, {id = spellId, data = data}) end
+        for spellId, data in pairs(ItemSpellDB) do table.insert(sortedItems, {id = spellId, data = data}) end
         table.sort(sortedItems, function(a, b) return a.data.layoutIndex < b.data.layoutIndex end)
 
         for _, item in ipairs(sortedItems) do
@@ -1034,45 +1095,44 @@ local function CreateCooldownViewerTrinketSettings(parentContainer, containerToR
             local data = item.data
 
             local itemCheckbox = AG:Create("CheckBox")
-            itemCheckbox:SetLabel("[" .. data.layoutIndex .. "] " .. FetchItemInformation(itemId))
+            itemCheckbox:SetLabel("[" .. data.layoutIndex .. "] " .. (FetchItemSpellInformation(itemId, data.entryType) or "Unknown"))
             itemCheckbox:SetValue(data.isActive)
-            itemCheckbox:SetCallback("OnValueChanged", function(_, _, value) TrinketDB[itemId].isActive = value BCDM:UpdateCooldownViewer("Item") end)
+            itemCheckbox:SetCallback("OnValueChanged", function(_, _, value) ItemSpellDB[itemId].isActive = value BCDM:UpdateCooldownViewer("ItemSpell") end)
             itemCheckbox:SetRelativeWidth(0.6)
             parentContainer:AddChild(itemCheckbox)
 
             local moveUpButton = AG:Create("Button")
             moveUpButton:SetText("Up")
             moveUpButton:SetRelativeWidth(0.1333)
-            moveUpButton:SetCallback("OnClick", function() BCDM:AdjustTrinketLayoutIndex(-1, itemId) parentContainer:ReleaseChildren() CreateCooldownViewerTrinketSettings(parentContainer, containerToRefresh) end)
+            moveUpButton:SetCallback("OnClick", function() BCDM:AdjustItemsSpellsLayoutIndex(-1, itemId) parentContainer:ReleaseChildren() CreateCooldownViewerItemSpellSettings(parentContainer, containerToRefresh) end)
             parentContainer:AddChild(moveUpButton)
 
             local moveDownButton = AG:Create("Button")
             moveDownButton:SetText("Down")
             moveDownButton:SetRelativeWidth(0.1333)
-            moveDownButton:SetCallback("OnClick", function() BCDM:AdjustTrinketLayoutIndex(1, itemId) parentContainer:ReleaseChildren() CreateCooldownViewerTrinketSettings(parentContainer, containerToRefresh) end)
+            moveDownButton:SetCallback("OnClick", function() BCDM:AdjustItemsSpellsLayoutIndex(1, itemId) parentContainer:ReleaseChildren() CreateCooldownViewerItemSpellSettings(parentContainer, containerToRefresh) end)
             parentContainer:AddChild(moveDownButton)
 
             local removeItemButton = AG:Create("Button")
             removeItemButton:SetText("X")
             removeItemButton:SetRelativeWidth(0.1333)
             removeItemButton:SetCallback("OnClick", function()
-                BCDM:AdjustTrinketList(itemId, "remove")
-                BCDM:UpdateCooldownViewer("Trinket")
+                BCDM:AdjustItemsSpellsList(itemId, "remove")
+                BCDM:UpdateCooldownViewer("ItemSpell")
                 parentContainer:ReleaseChildren()
-                CreateCooldownViewerTrinketSettings(parentContainer, containerToRefresh)
+                CreateCooldownViewerItemSpellSettings(parentContainer, containerToRefresh)
             end)
             parentContainer:AddChild(removeItemButton)
         end
     end
 
-    containerToRefresh:DoLayout()
 
     return parentContainer
 end
 
 local function CreateCooldownViewerSettings(parentContainer, viewerType)
-    local hasAnchorParent = viewerType == "Utility" or viewerType == "Buffs" or viewerType == "Custom" or viewerType == "AdditionalCustom" or viewerType == "Item" or viewerType == "Trinket"
-    local isCustomViewer = viewerType == "Custom" or viewerType == "AdditionalCustom" or viewerType == "Item" or viewerType == "Trinket"
+    local hasAnchorParent = viewerType == "Utility" or viewerType == "Buffs" or viewerType == "Custom" or viewerType == "AdditionalCustom" or viewerType == "Item" or viewerType == "Trinket" or viewerType == "ItemSpell"
+    local isCustomViewer = viewerType == "Custom" or viewerType == "AdditionalCustom" or viewerType == "Item" or viewerType == "Trinket" or viewerType == "ItemSpell"
 
     local ScrollFrame = AG:Create("ScrollFrame")
     ScrollFrame:SetLayout("Flow")
@@ -1254,6 +1314,16 @@ local function CreateCooldownViewerSettings(parentContainer, viewerType)
         itemContainer:SetLayout("Flow")
         ScrollFrame:AddChild(itemContainer)
         CreateCooldownViewerItemSettings(itemContainer, ScrollFrame)
+    end
+
+    if viewerType == "ItemSpell" then
+        local itemSpellContainer = AG:Create("InlineGroup")
+        itemSpellContainer:SetTitle("Items & Spells")
+        itemSpellContainer:SetFullWidth(true)
+        itemSpellContainer:SetLayout("Flow")
+        ScrollFrame:AddChild(itemSpellContainer)
+        CreateInformationTag(itemSpellContainer, "|cFFFFCC00Spells|r can be added by their |cFF8080FFSpell Name|r or |cFF8080FFSpell ID|r, |cFFFFCC00Items|r must be added by their |cFF8080FFItem ID|r.");
+        CreateCooldownViewerItemSpellSettings(itemSpellContainer, ScrollFrame)
     end
 
     ScrollFrame:DoLayout()
@@ -2348,6 +2418,8 @@ function BCDM:CreateGUI()
             CreateCooldownViewerSettings(Wrapper, "Item")
         elseif MainTab == "Trinket" then
             CreateCooldownViewerSettings(Wrapper, "Trinket")
+        elseif MainTab == "ItemSpell" then
+            CreateCooldownViewerSettings(Wrapper, "ItemSpell")
         elseif MainTab == "PowerBar" then
             CreatePowerBarSettings(Wrapper)
         elseif MainTab == "SecondaryPowerBar" then
@@ -2379,6 +2451,7 @@ function BCDM:CreateGUI()
         { text = "Additional Custom", value = "AdditionalCustom"},
         { text = "Item", value = "Item"},
         { text = "Trinkets", value = "Trinket"},
+        { text = "Items & Spells", value = "ItemSpell"},
         { text = "Power Bar", value = "PowerBar"},
         { text = "Secondary Power Bar", value = "SecondaryPowerBar"},
         { text = "Cast Bar", value = "CastBar"},
