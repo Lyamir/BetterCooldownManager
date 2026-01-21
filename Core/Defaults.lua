@@ -104,7 +104,6 @@ local Defaults = {
                     Enabled = false,
                     Anchor = "CENTER",
                     FontSize = 14,
-                    FontName = "Friz Quadrata TT",
                     FontFlags = {},
                     OffsetX = 0,
                     OffsetY = 0,

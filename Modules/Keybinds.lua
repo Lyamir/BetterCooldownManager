@@ -397,8 +397,8 @@ local function GetOrCreateKeybindText(icon)
 end
 
 local function GetKeybindFontName()
-    if BCDM.db and BCDM.db.profile and BCDM.db.profile.CooldownManager.General.Keybinds then
-        return BCDM.db.profile.CooldownManager.General.Keybinds.FontName
+    if BCDM.db and BCDM.db.profile and BCDM.db.profile.General and BCDM.db.profile.General.Fonts then
+        return BCDM.db.profile.General.Fonts.Font
     end
     return "Friz Quadrata TT"
 end
@@ -738,4 +738,13 @@ function Keybinds:OnSettingChanged()
     elseif isModuleKeybindsEnabled then
         self:UpdateAllKeybinds()
     end
+end
+
+function BCDM:UpdateKeybinds()
+    if not isModuleKeybindsEnabled then
+        return
+    end
+    
+    BuildAllIconSpellCaches()
+    Keybinds:UpdateAllKeybinds()
 end
