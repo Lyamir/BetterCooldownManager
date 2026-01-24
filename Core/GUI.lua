@@ -1352,7 +1352,7 @@ local function CreateCooldownViewerSettings(parentContainer, viewerType)
     layoutContainer:AddChild(anchorFromDropdown)
 
     if hasAnchorParent then
-        AddAnchors("MidnightSimpleUnitFrames", {"Utility", "Custom", "AdditionalCustom"}, { ["MSUF_player"] = "|cFFFFD700Midnight|rSimpleUnitFrames: Player Frame", ["MSUF_target"] = "|cFFFFD700Midnight|rSimpleUnitFrames: Target Frame", })
+        AddAnchors("MidnightSimpleUnitFrames", {"Utility", "Buffs", "Custom", "AdditionalCustom", "Item", "Trinket", "ItemSpell"}, { ["MSUF_player"] = "|cFFFFD700Midnight|rSimpleUnitFrames: Player Frame", ["MSUF_target"] = "|cFFFFD700Midnight|rSimpleUnitFrames: Target Frame", })
         local anchorToParentDropdown = AG:Create("Dropdown")
         anchorToParentDropdown:SetLabel("Anchor To Parent")
         anchorToParentDropdown:SetList(AnchorParents[viewerType][1], AnchorParents[viewerType][2])
