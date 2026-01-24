@@ -240,7 +240,6 @@ function BCDM:CreateCastBar()
         CastBar:Hide()
         CastBar:SetScript("OnEvent", nil)
         CastBar:UnregisterAllEvents()
-        PlayerCastingBarFrame:SetUnit("player")
     end
 end
 
@@ -341,7 +340,6 @@ function BCDM:UpdateCastBar()
         CastBar:Hide()
         CastBar:SetScript("OnEvent", nil)
         CastBar:UnregisterAllEvents()
-        PlayerCastingBarFrame:SetUnit("player")
     end
     if BCDM.CAST_BAR_TEST_MODE then BCDM:CreateTestCastBar() end
 end
