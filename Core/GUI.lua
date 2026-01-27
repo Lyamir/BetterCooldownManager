@@ -1340,13 +1340,25 @@ local function CreateCooldownViewerSettings(parentContainer, viewerType)
     yOffsetSlider:SetRelativeWidth(isCustomViewer and 0.25 or 0.33)
     layoutContainer:AddChild(yOffsetSlider)
 
-    local iconSizeSlider = AG:Create("Slider")
-    iconSizeSlider:SetLabel("Icon Size")
-    iconSizeSlider:SetValue(BCDM.db.profile.CooldownManager[viewerType].IconSize)
-    iconSizeSlider:SetSliderValues(16, 128, 0.1)
-    iconSizeSlider:SetCallback("OnValueChanged", function(self, _, value) BCDM.db.profile.CooldownManager[viewerType].IconSize = value BCDM:UpdateCooldownViewer(viewerType) end)
-    iconSizeSlider:SetRelativeWidth(isCustomViewer and 0.25 or 0.33)
-    layoutContainer:AddChild(iconSizeSlider)
+    local currentIconWidth = BCDM.db.profile.CooldownManager[viewerType].IconWidth or BCDM.db.profile.CooldownManager[viewerType].IconSize
+    local currentIconHeight = BCDM.db.profile.CooldownManager[viewerType].IconHeight or BCDM.db.profile.CooldownManager[viewerType].IconSize
+    local relWidth = isCustomViewer and 0.125 or 0.165
+
+    local iconWidthSlider = AG:Create("Slider")
+    iconWidthSlider:SetLabel("Icon Width")
+    iconWidthSlider:SetValue(currentIconWidth)
+    iconWidthSlider:SetSliderValues(16, 256, 0.1)
+    iconWidthSlider:SetCallback("OnValueChanged", function(self, _, value) BCDM.db.profile.CooldownManager[viewerType].IconWidth = value BCDM:UpdateCooldownViewer(viewerType) end)
+    iconWidthSlider:SetRelativeWidth(relWidth)
+    layoutContainer:AddChild(iconWidthSlider)
+
+    local iconHeightSlider = AG:Create("Slider")
+    iconHeightSlider:SetLabel("Icon Height")
+    iconHeightSlider:SetValue(currentIconHeight)
+    iconHeightSlider:SetSliderValues(16, 256, 0.1)
+    iconHeightSlider:SetCallback("OnValueChanged", function(self, _, value) BCDM.db.profile.CooldownManager[viewerType].IconHeight = value BCDM:UpdateCooldownViewer(viewerType) end)
+    iconHeightSlider:SetRelativeWidth(relWidth)
+    layoutContainer:AddChild(iconHeightSlider)
 
     if viewerType == "Essential" or viewerType == "Utility" or viewerType == "Buffs" then
         local infoTag = CreateInformationTag(layoutContainer, "Updates To Sizes will be applied on closing the |cFF8080FFBetter|rCooldownManager Configuration Window.")

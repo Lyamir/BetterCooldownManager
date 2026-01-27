@@ -223,7 +223,8 @@ local function StyleIcons()
                 end
                 if childFrame.CooldownFlash then childFrame.CooldownFlash:SetAlpha(0) end
                 if childFrame.DebuffBorder then childFrame.DebuffBorder:SetAlpha(0) end
-                childFrame:SetSize(cooldownManagerSettings[BCDM.CooldownManagerViewerToDBViewer[viewerName]].IconSize, cooldownManagerSettings[BCDM.CooldownManagerViewerToDBViewer[viewerName]].IconSize)
+                local dbViewer = cooldownManagerSettings[BCDM.CooldownManagerViewerToDBViewer[viewerName]]
+                childFrame:SetSize(dbViewer.IconWidth or dbViewer.IconSize, dbViewer.IconHeight or dbViewer.IconSize)
                 BCDM:AddBorder(childFrame)
                 if not childFrame.layoutIndex then childFrame:SetShown(false) end
             end
@@ -375,7 +376,7 @@ function BCDM:UpdateCooldownViewer(viewerType)
                 childFrame.Cooldown:SetSwipeTexture("Interface\\Buttons\\WHITE8X8")
             end
             if childFrame.CooldownFlash then childFrame.CooldownFlash:SetAlpha(0) end
-            childFrame:SetSize(cooldownManagerSettings[viewerType].IconSize, cooldownManagerSettings[viewerType].IconSize)
+            childFrame:SetSize(cooldownManagerSettings[viewerType].IconWidth or cooldownManagerSettings[viewerType].IconSize, cooldownManagerSettings[viewerType].IconHeight or cooldownManagerSettings[viewerType].IconSize)
         end
     end
 

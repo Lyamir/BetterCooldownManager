@@ -9,6 +9,22 @@ function BetterCooldownManager:OnInitialize()
             BCDM.db.profile[k] = v
         end
     end
+    -- Migration: populate IconWidth/IconHeight from legacy IconSize when missing
+    do
+        local cm = BCDM.db.profile.CooldownManager
+        if cm then
+            local viewers = { "Essential", "Utility", "Buffs", "Custom", "AdditionalCustom", "Item", "Trinket", "ItemSpell" }
+            for _, name in ipairs(viewers) do
+                local entry = cm[name]
+                if entry and type(entry) == "table" then
+                    if entry.IconSize and (entry.IconWidth == nil or entry.IconHeight == nil) then
+                        entry.IconWidth = entry.IconWidth or entry.IconSize
+                        entry.IconHeight = entry.IconHeight or entry.IconSize
+                    end
+                end
+            end
+        end
+    end
     if BCDM.db.global.UseGlobalProfile then BCDM.db:SetProfile(BCDM.db.global.GlobalProfile or "Default") end
     BCDM.db.RegisterCallback(BCDM, "OnProfileChanged", function() BCDM:UpdateBCDM() end)
 end
