@@ -134,6 +134,36 @@ local function SetHooks()
     hooksecurefunc(EditModeManagerFrame, "ExitEditMode", function() if InCombatLockdown() then return end  BCDM:UpdateCastBarWidth() end)
 end
 
+local function DetectSecondaryPower()
+    local class = select(2, UnitClass("player"))
+    local spec  = GetSpecialization()
+    local specID = GetSpecializationInfo(spec)
+    if class == "MONK" then
+        if specID == 268 then return true end
+        if specID == 269 then return true end
+    elseif class == "ROGUE" then
+        return true
+    elseif class == "DRUID" then
+        local form = GetShapeshiftFormID()
+        if form == 1 then return true end
+    elseif class == "PALADIN" then
+        return true
+    elseif class == "WARLOCK" then
+        return true
+    elseif class == "MAGE" then
+        if specID == 62 then return true end
+    elseif class == "EVOKER" then
+        return true
+    elseif class == "DEATHKNIGHT" then
+        return true
+    elseif class == "DEMONHUNTER" then
+        if specID == 1480 then return true end
+    elseif class == "SHAMAN" then
+        if specID == 263 then return true end
+    end
+    return false
+end
+
 function BCDM:CreateCastBar()
     local GeneralDB = BCDM.db.profile.General
     local CastBarDB = BCDM.db.profile.CastBar
@@ -154,11 +184,16 @@ function BCDM:CreateCastBar()
     end
     CastBar:SetBackdropColor(CastBarDB.BackgroundColour[1], CastBarDB.BackgroundColour[2], CastBarDB.BackgroundColour[3], CastBarDB.BackgroundColour[4])
     CastBar:SetSize(CastBarDB.Width, CastBarDB.Height)
-    CastBar:SetPoint(CastBarDB.Layout[1], _G[CastBarDB.Layout[2]], CastBarDB.Layout[3], CastBarDB.Layout[4], CastBarDB.Layout[5])
+    local anchorKey = CastBarDB.Layout[2]
+    -- If user selected the Secondary Power Bar but the class/spec doesn't provide it, fall back to the primary Power Bar
+    if anchorKey == "BCDM_SecondaryPowerBar" and not DetectSecondaryPower() then anchorKey = "BCDM_PowerBar" end
+    CastBar:SetPoint(CastBarDB.Layout[1], _G[anchorKey], CastBarDB.Layout[3], CastBarDB.Layout[4], CastBarDB.Layout[5])
     CastBar:SetFrameStrata(CastBarDB.FrameStrata or "LOW")
 
     if CastBarDB.MatchWidthOfAnchor then
-        local anchorFrame = _G[CastBarDB.Layout[2]]
+        local anchorKey = CastBarDB.Layout[2]
+        if anchorKey == "BCDM_SecondaryPowerBar" and not DetectSecondaryPower() then anchorKey = "BCDM_PowerBar" end
+        local anchorFrame = _G[anchorKey]
         if anchorFrame then
             C_Timer.After(0.1, function() local anchorWidth = anchorFrame:GetWidth() CastBar:SetWidth(anchorWidth) end)
         end
@@ -253,7 +288,9 @@ function BCDM:UpdateCastBar()
     BCDM.CastBar:SetBackdropColor(CastBarDB.BackgroundColour[1], CastBarDB.BackgroundColour[2], CastBarDB.BackgroundColour[3], CastBarDB.BackgroundColour[4])
     BCDM.CastBar:SetSize(CastBarDB.Width, CastBarDB.Height)
     BCDM.CastBar:ClearAllPoints()
-    BCDM.CastBar:SetPoint(CastBarDB.Layout[1], _G[CastBarDB.Layout[2]], CastBarDB.Layout[3], CastBarDB.Layout[4], CastBarDB.Layout[5])
+    local anchorKey = CastBarDB.Layout[2]
+    if anchorKey == "BCDM_SecondaryPowerBar" and not DetectSecondaryPower() then anchorKey = "BCDM_PowerBar" end
+    BCDM.CastBar:SetPoint(CastBarDB.Layout[1], _G[anchorKey], CastBarDB.Layout[3], CastBarDB.Layout[4], CastBarDB.Layout[5])
     BCDM.CastBar:SetFrameStrata(CastBarDB.FrameStrata or "LOW")
     CastBar:SetBackdrop(BCDM.BACKDROP)
     if borderSize > 0 then
@@ -267,7 +304,9 @@ function BCDM:UpdateCastBar()
     BCDM.CastBar.Status:SetStatusBarTexture(BCDM.Media.Foreground)
 
     if CastBarDB.MatchWidthOfAnchor then
-        local anchorFrame = _G[CastBarDB.Layout[2]]
+        local anchorKey = CastBarDB.Layout[2]
+        if anchorKey == "BCDM_SecondaryPowerBar" and not DetectSecondaryPower() then anchorKey = "BCDM_PowerBar" end
+        local anchorFrame = _G[anchorKey]
         if anchorFrame then
             C_Timer.After(0.1, function() local anchorWidth = anchorFrame:GetWidth() CastBar:SetWidth(anchorWidth) end)
         end
@@ -380,9 +419,40 @@ function BCDM:UpdateCastBarWidth()
     local CastBarDB = BCDM.db.profile.CastBar
     local CastBar = BCDM.CastBar
     if CastBarDB.Enabled and CastBarDB.MatchWidthOfAnchor then
-        local anchorFrame = _G[CastBarDB.Layout[2]]
+        local anchorKey = CastBarDB.Layout[2]
+        if anchorKey == "BCDM_SecondaryPowerBar" and not DetectSecondaryPower() then anchorKey = "BCDM_PowerBar" end
+        local anchorFrame = _G[anchorKey]
         if anchorFrame then
             C_Timer.After(0.5, function() local anchorWidth = anchorFrame:GetWidth() CastBar:SetWidth(anchorWidth) end)
         end
     end
+end
+
+-- Watch for class/spec/form changes and re-anchor the cast bar when secondary power availability changes.
+do
+    local anchorWatcher = CreateFrame("Frame")
+    local pendingReanchor = false
+    anchorWatcher:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+    anchorWatcher:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+    anchorWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+    anchorWatcher:RegisterEvent("UPDATE_SHAPESHIFT_COOLDOWN")
+    anchorWatcher:SetScript("OnEvent", function(self, event, ...)
+        -- If we're in combat, delay any re-anchoring until we're out of combat
+        if InCombatLockdown() then
+            if not pendingReanchor then
+                pendingReanchor = true
+                self:RegisterEvent("PLAYER_REGEN_ENABLED")
+            end
+            return
+        end
+
+        if event == "PLAYER_REGEN_ENABLED" then
+            pendingReanchor = false
+            self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        end
+
+        if BCDM and BCDM.UpdateCastBar then
+            BCDM:UpdateCastBar()
+        end
+    end)
 end
