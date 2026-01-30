@@ -6,7 +6,6 @@ function BCDM:SetupEventManager()
     BCDMEventManager:RegisterEvent("PLAYER_ENTERING_WORLD")
     BCDMEventManager:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     BCDMEventManager:RegisterEvent("TRAIT_CONFIG_UPDATED")
-    BCDMEventManager:RegisterEvent("PLAYER_REGEN_ENABLED")
     BCDMEventManager:SetScript("OnEvent", function(_, event, ...)
         if InCombatLockdown() then return end
         if event == "PLAYER_SPECIALIZATION_CHANGED" then
