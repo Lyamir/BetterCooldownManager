@@ -104,11 +104,12 @@ local function CreateCustomIcon(itemId)
     customIcon.Cooldown:SetAllPoints(customIcon)
     customIcon.Cooldown:SetDrawEdge(false)
     customIcon.Cooldown:SetDrawSwipe(true)
+    customIcon.Cooldown:SetDrawBling(false)
     customIcon.Cooldown:SetSwipeColor(0, 0, 0, 0.8)
     customIcon.Cooldown:SetHideCountdownNumbers(false)
     customIcon.Cooldown:SetReverse(false)
 
-    customIcon:HookScript("OnEvent", function(self, event, ...)
+    customIcon:SetScript("OnEvent", function(self, event, ...)
         if event == "SPELL_UPDATE_COOLDOWN" or event == "PLAYER_ENTERING_WORLD" or event == "ITEM_COUNT_CHANGED" then
             local itemCount, startTime, durationTime = FetchItemData(itemId)
             if itemCount then

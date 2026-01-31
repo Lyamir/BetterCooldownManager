@@ -375,7 +375,7 @@ function BCDM:FetchEquippedTrinkets()
         end
     end
 
-    if usableCount == 0 then BCDM.TrinketBarContainer:Hide() return end
+    if usableCount == 0 and BCDM.TrinketBarContainer then BCDM.TrinketBarContainer:Hide() return end
 
     BCDM:UpdateCooldownViewer("Trinket")
 end

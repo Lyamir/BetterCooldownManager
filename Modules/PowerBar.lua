@@ -23,6 +23,8 @@ local function DetectSecondaryPower()
     local class = select(2, UnitClass("player"))
     local spec  = GetSpecialization()
     local specID = GetSpecializationInfo(spec)
+    local secondaryPowerBarDB = BCDM.db and BCDM.db.profile and BCDM.db.profile.SecondaryPowerBar
+    local showMana = secondaryPowerBarDB and (secondaryPowerBarDB.ShowMana or secondaryPowerBarDB.ShowManaBar)
     if class == "MONK" then
         if specID == 268 then return true end
         if specID == 269 then return true end
@@ -44,7 +46,10 @@ local function DetectSecondaryPower()
     elseif class == "DEMONHUNTER" then
         if specID == 1480 then return true end
     elseif class == "SHAMAN" then
+        if specID == 262 and showMana then return true end
         if specID == 263 then return true end
+    elseif class == "PRIEST" then
+        if specID == 258 and showMana then return true end    
     end
     return false
 end

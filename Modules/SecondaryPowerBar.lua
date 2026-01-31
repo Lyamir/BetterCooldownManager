@@ -21,6 +21,7 @@ local function DetectSecondaryPower()
     local class = select(2, UnitClass("player"))
     local spec = C_SpecializationInfo.GetSpecialization()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
+    local secondaryPowerBarDB = BCDM.db and BCDM.db.profile and BCDM.db.profile.SecondaryPowerBar
     isDestruction = C_SpecializationInfo.GetSpecializationInfo(C_SpecializationInfo.GetSpecialization()) == 267
 
     if class == "MONK" then
@@ -471,6 +472,14 @@ local function UpdatePowerValues()
         end
         secondaryPowerBar.Text:SetText(textDisplay)
         secondaryPowerBar.Status:Show()
+    elseif powerType == "MANA" then
+        BCDM:ClearTicks()
+        powerCurrent = UnitPower("player", Enum.PowerType.Mana)
+        local powerMax = UnitPowerMax("player", Enum.PowerType.Mana)
+        secondaryPowerBar.Status:SetMinMaxValues(0, powerMax)
+        secondaryPowerBar.Status:SetValue(powerCurrent)
+        secondaryPowerBar.Text:SetText(tostring(powerCurrent))
+        secondaryPowerBar.Status:Show()
     elseif powerType == Enum.PowerType.Maelstrom then
         powerCurrent = GetAuraStacks(344179)
         secondaryPowerBar.Status:SetMinMaxValues(0, 10)
@@ -584,7 +593,9 @@ local function CreateTicksBasedOnPowerType()
     if secondaryPowerResource == "STAGGER" then
         return
     end
-
+    if secondaryPowerResource == "MANA" then
+        return
+    end
     if secondaryPowerResource == Enum.PowerType.Runes then
         BCDM:ClearTicks()
         CreateRuneBars()
