@@ -530,6 +530,13 @@ local function CreateGlobalSettings(parentContainer)
     borderSizeSlider:SetRelativeWidth(0.5)
     globalSettingsContainer:AddChild(borderSizeSlider)
 
+    local hideBlizzardSwipesCheckbox = AG:Create("CheckBox")
+    hideBlizzardSwipesCheckbox:SetLabel("Hide Blizzard Cooldown Swipes")
+    hideBlizzardSwipesCheckbox:SetValue(CooldownManagerDB.General.HideBlizzardSwipes)
+    hideBlizzardSwipesCheckbox:SetCallback("OnValueChanged", function(_, _, value) CooldownManagerDB.General.HideBlizzardSwipes = value BCDM:HideBlizzardSwipes() end)
+    hideBlizzardSwipesCheckbox:SetRelativeWidth(1)
+    globalSettingsContainer:AddChild(hideBlizzardSwipesCheckbox)
+
     local FontContainer = AG:Create("InlineGroup")
     FontContainer:SetTitle("Font Settings")
     FontContainer:SetFullWidth(true)

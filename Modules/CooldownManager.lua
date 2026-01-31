@@ -336,6 +336,7 @@ function BCDM:SkinCooldownManager()
     StyleChargeCount()
     Position()
     SetHooks()
+    BCDM:HideBlizzardSwipes()
     SetupCenterBuffs()
     for _, viewerName in ipairs(BCDM.CooldownManagerViewers) do
         C_Timer.After(0.1, function() ApplyCooldownText(viewerName) end)
@@ -405,4 +406,74 @@ function BCDM:UpdateCooldownViewers()
     BCDM:UpdatePowerBar()
     BCDM:UpdateSecondaryPowerBar()
     BCDM:UpdateCastBar()
+end
+
+-- Hide Blizzard Cooldown Swipes functionality
+local function HideCooldownSwipe(cooldown)
+    if cooldown and cooldown.SetDrawSwipe then
+        cooldown:SetDrawSwipe(false)
+        cooldown:SetDrawEdge(false)
+    end
+end
+
+local function HookBlizzardCooldowns()
+    -- Hook CooldownFrame_Set which is called whenever a cooldown is set
+    hooksecurefunc("CooldownFrame_Set", function(self)
+        HideCooldownSwipe(self)
+    end)
+
+    -- Also hook the SetCooldown method directly
+    local cooldownMeta = getmetatable(CreateFrame("Cooldown")).__index
+    hooksecurefunc(cooldownMeta, "SetCooldown", function(self)
+        HideCooldownSwipe(self)
+    end)
+end
+
+local function ScanExistingCooldowns()
+    -- Scan existing cooldown frames
+    for i = 1, 200 do
+        local btn = _G["ActionButton"..i]
+        if btn and btn.cooldown then
+            HideCooldownSwipe(btn.cooldown)
+        end
+
+        local mbtn = _G["MultiBarBottomLeftButton"..i]
+        if mbtn and mbtn.cooldown then
+            HideCooldownSwipe(mbtn.cooldown)
+        end
+
+        local mbtn2 = _G["MultiBarBottomRightButton"..i]
+        if mbtn2 and mbtn2.cooldown then
+            HideCooldownSwipe(mbtn2.cooldown)
+        end
+
+        local mbtn3 = _G["MultiBarLeftButton"..i]
+        if mbtn3 and mbtn3.cooldown then
+            HideCooldownSwipe(mbtn3.cooldown)
+        end
+
+        local mbtn4 = _G["MultiBarRightButton"..i]
+        if mbtn4 and mbtn4.cooldown then
+            HideCooldownSwipe(mbtn4.cooldown)
+        end
+    end
+end
+
+function BCDM:HideBlizzardSwipes()
+    if not BCDM.db.profile.CooldownManager.General.HideBlizzardSwipes then return end
+
+    HookBlizzardCooldowns()
+    ScanExistingCooldowns()
+
+    -- Hook after other addons load
+    local frame = CreateFrame("Frame")
+    frame:RegisterEvent("ADDON_LOADED")
+    frame:SetScript("OnEvent", function(self, event, arg1)
+        if event == "ADDON_LOADED" and (arg1 == "Blizzard_UIParent" or arg1:lower():match("cooldown")) then
+            C_Timer.After(1, function()
+                HookBlizzardCooldowns()
+                ScanExistingCooldowns()
+            end)
+        end
+    end)
 end
